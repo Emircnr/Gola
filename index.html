@@ -2,362 +2,97 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Fiyat Karşılaştırma & Muhasebe Sistemi</title>
+  <title>Fiyat Karşılaştırma (Tüm Coinler)</title>
+  <!-- Mobil cihazlarda responsive görünüm -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Örnek font (isteğe bağlı) -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
-  
   <style>
-    /********************************************
-     * GENEL SIFIRLAMA & GÖRSEL AYARLAR
-     ********************************************/
-    * {
-      margin: 0;
+    /* Sıfırlama ve temel ayarlar */
+    html, body {
+      margin: 0; 
       padding: 0;
       box-sizing: border-box;
-    }
-    html, body {
-      width: 100%;
-      height: 100%;
-      font-family: 'Roboto', sans-serif;
-      background-color: #eceff1;
+      background: #f0f0f0;
+      font-family: Arial, sans-serif;
     }
 
+    /* Konteyner - pencere benzeri */
     .window-container {
-      max-width: 1500px;
+      width: 100%;
+      max-width: 1400px;     /* Geniş ekranlarda daha fazla genişleyebilir */
       margin: 0 auto;
-      min-height: 100vh;
+      background: #fff;
+      border: 1px solid #ccc;
+      min-height: 100vh;     /* Ekran yüksekliğini doldursun */
       display: flex;
       flex-direction: column;
-      background: #fff;
-      border: 2px solid #bbb;
-      position: relative;
     }
 
-    /********************************************
-     * ÜST BAŞLIK BÖLÜMÜ
-     ********************************************/
-    .header-bar {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background-color: #cfd8dc;
-      border-bottom: 2px solid #bbb;
-      position: relative;
-      padding: 1rem;
-    }
+    /* Başlık (boşluk yok) */
     .window-title {
-      font-size: 2.4rem; 
-      font-weight: 700;
+      margin: 0;
+      padding: 0;           /* Üst-alt boşluğu sıfır */
       text-align: center;
-    }
-    /* Sağ üst ikonların bulunduğu alan */
-    .icons-container {
-      position: absolute;
-      right: 1.5rem;
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex;
-      gap: 25px;
-    }
-    .icon-btn {
-      cursor: pointer;
-      width: 42px;
-      height: 42px;
-      opacity: 0.85;
-      transition: opacity 0.2s;
-    }
-    .icon-btn:hover {
-      opacity: 1;
+      font-weight: bold;
+      font-size: 2rem;      /* Daha büyük başlık yazısı */
+      background-color: #e0e0e0;
+      border-bottom: 1px solid #ccc;
+      line-height: 1.2;     /* Satır yüksekliği */
     }
 
-    /********************************************
-     * TABLO ALANI (COIN FİYAT KARŞILAŞTIRMA)
-     ********************************************/
+    /* Tablo alanı */
     .table-container {
-      flex: 1;
-      overflow-x: auto;
-      padding: 1rem 2rem;
+      flex: 1;              /* Kalan alanı kaplasın */
+      margin: 0;            /* Boşlukları sıfırla */
+      padding: 0;           /* Yukarı-aşağı boşluk yok */
+      overflow-x: auto;     /* Taşma olursa yatay kaydırma */
     }
+
+    /* Tablo kendisi */
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 2rem; /* Büyük font */
+      font-size: 1.8rem; /* Büyük yazı */
       background: #fff;
-      min-width: 600px;
-      margin: 0 auto;
     }
+
     th, td {
       border: 1px solid #ddd;
-      padding: 15px 20px;
+      padding: 15px;         /* Hücre iç boşluğu */
       text-align: center;
-      font-weight: 500;
+      font-weight: bold;     /* Kalın yazı */
     }
+
     th {
-      background-color: #37474f;
+      background-color: #444;
       color: #fff;
-      font-weight: 700;
     }
+
+    /* Satır yüksekliği ayarı */
     tr {
-      height: 70px;
+      height: 60px; /* Daha yüksek satırlar */
     }
 
-    /* Fiyat hücrelerini parlak renklerle vurgula (eskisi gibi) */
-    .bg-green {
-      background-color: #7CFC00; /* parlak yeşil */
-      color: #000;
-    }
-    .bg-yellow {
-      background-color: #FFFF00; /* parlak sarı */
-      color: #000;
-    }
-
-    /********************************************
-     * RESPONSIVE (MOBİL) AYARLAR
-     ********************************************/
+    /* Mobil uyum - daha küçük ekranlar için boyutu biraz düşürelim */
     @media (max-width: 768px) {
       .window-title {
-        font-size: 1.8rem;
+        font-size: 1.6rem;  /* Başlığı biraz küçült */
       }
       table {
-        font-size: 1.4rem;
+        font-size: 1.4rem;  /* Tablo yazı boyutu */
       }
       th, td {
-        padding: 8px 10px;
+        padding: 10px;
       }
       tr {
         height: 50px;
       }
-      .icon-btn {
-        width: 32px;
-        height: 32px;
-      }
-      .icons-container {
-        gap: 15px;
-      }
-    }
-
-    /********************************************
-     * MODAL GENEL STİL (ORTAK)
-     ********************************************/
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; 
-      height: 100%;
-      background: rgba(0, 0, 0, 0.5);
-      display: none; /* başlangıçta kapalı */
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-    }
-    .modal-content {
-      background: #fff;
-      width: 90%;
-      max-width: 600px;
-      padding: 20px 30px;
-      border-radius: 8px;
-      position: relative;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    }
-    .modal-close-btn {
-      position: absolute;
-      right: 15px;
-      top: 15px;
-      cursor: pointer;
-      font-size: 1.2rem;
-      background: #bbb;
-      border: none;
-      border-radius: 5px;
-      padding: 5px 10px;
-    }
-    .modal-title {
-      font-size: 1.8rem;
-      font-weight: bold;
-      margin-bottom: 1rem;
-      text-align: center;
-    }
-    .modal-form-group {
-      margin-bottom: 1.2rem;
-      display: flex;
-      flex-direction: column;
-    }
-    .modal-form-group label {
-      margin-bottom: 0.4rem;
-      font-weight: 500;
-    }
-    .modal-form-group input {
-      padding: 0.6rem;
-      font-size: 1.1rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .modal-form-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
-      margin-top: 1rem;
-    }
-    .save-btn, .cancel-btn, .update-btn {
-      cursor: pointer;
-      padding: 0.7rem 1.5rem;
-      font-size: 1rem;
-      border: none;
-      border-radius: 4px;
-      transition: background-color 0.2s;
-      font-weight: 600;
-    }
-    .save-btn {
-      background-color: #4caf50; 
-      color: #fff;
-    }
-    .save-btn:hover {
-      background-color: #43a047;
-    }
-    .cancel-btn {
-      background-color: #f44336;
-      color: #fff;
-    }
-    .cancel-btn:hover {
-      background-color: #e53935;
-    }
-    .update-btn {
-      background-color: #2196f3;
-      color: #fff;
-    }
-    .update-btn:hover {
-      background-color: #1e88e5;
-    }
-    /* Silme butonu (küçük) */
-    .delete-btn {
-      background-color: #f44336;
-      border: none;
-      color: #fff;
-      padding: 0.4rem 0.8rem;
-      border-radius: 4px;
-      font-size: 0.9rem;
-      cursor: pointer;
-      margin-left: 5px;
-    }
-    .delete-btn:hover {
-      background-color: #e53935;
-    }
-
-    /********************************************
-     * 1) MUHASEBE EKLE MODALI
-     ********************************************/
-    /* .accounting-modal-overlay -> "Muhasebe Ekle" */
-    /* Yukarıdaki .modal-overlay stillerini kullanır. */
-
-    /********************************************
-     * 2) VERİ GEÇMİŞİ (TÜM KAYITLAR) MODALI
-     ********************************************/
-    /* .history-modal-overlay -> "Veri Geçmişi" */
-    .history-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 1rem;
-      font-size: 1.4rem;
-    }
-    .history-table th, .history-table td {
-      border: 1px solid #ccc;
-      padding: 8px 12px;
-      text-align: center;
-    }
-    .history-table th {
-      background: #455a64;
-      color: #fff;
-    }
-    .edit-btn {
-      background-color: #ffb300;
-      border: none;
-      color: #fff;
-      padding: 0.4rem 0.8rem;
-      border-radius: 4px;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-    .edit-btn:hover {
-      background-color: #ffa000;
-    }
-
-    /********************************************
-     * 3) İSTATİSTİK MODALI (AVERAGE vs.)
-     ********************************************/
-    /* .stats-modal-overlay -> "İstatistik" */
-    .stats-content {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      font-size: 1.2rem;
-    }
-    .stats-buttons {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-bottom: 1rem;
-    }
-    .range-btn {
-      background-color: #607d8b;
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 0.4rem 0.8rem;
-      cursor: pointer;
-      font-weight: 500;
-    }
-    .range-btn:hover {
-      background-color: #546e7a;
-    }
-    .stats-result {
-      background: #f5f5f5;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      padding: 1rem;
-      text-align: center;
-    }
-    .stats-line {
-      margin-bottom: 0.5rem;
-      font-weight: 500;
     }
   </style>
 </head>
 <body>
   <div class="window-container">
-    
-    <!-- ÜST BAŞLIK + İKONLAR -->
-    <div class="header-bar">
-      <h1 class="window-title">Fiyat Karşılaştırma (Tüm Coinler)</h1>
-      <div class="icons-container">
-        <!-- 1) Muhasebe Ekle -->
-        <img 
-          src="https://cdn-icons-png.flaticon.com/512/9115/9115967.png" 
-          class="icon-btn" 
-          id="accounting-add-icon"
-          title="Gün Sonu Muhasebe Ekle"
-          alt="Muhasebe Ekle İkonu" />
+    <div class="window-title">Fiyat Karşılaştırma (Tüm Coinler)</div>
 
-        <!-- 2) Veri Geçmişi -->
-        <img 
-          src="https://cdn-icons-png.flaticon.com/512/831/831276.png" 
-          class="icon-btn" 
-          id="history-icon"
-          title="Veri Geçmişi"
-          alt="Veri Geçmişi İkonu" />
-
-        <!-- 3) İstatistik -->
-        <img 
-          src="https://cdn-icons-png.flaticon.com/512/724/724910.png" 
-          class="icon-btn" 
-          id="stats-icon"
-          title="İstatistikler"
-          alt="İstatistik İkonu" />
-      </div>
-    </div>
-
-    <!-- TABLO ALANI (COIN) -->
     <div class="table-container">
       <table id="price-table">
         <thead>
@@ -375,131 +110,19 @@
     </div>
   </div>
 
-  <!-- 1) MUHASEBE EKLE MODALI -->
-  <div class="modal-overlay" id="accounting-modal-overlay">
-    <div class="modal-content">
-      <button class="modal-close-btn" id="accounting-modal-close">X</button>
-      <h2 class="modal-title">Gün Sonu Muhasebe Ekle</h2>
-      
-      <div class="modal-form-group">
-        <label for="date-input">Tarih:</label>
-        <input type="date" id="date-input" />
-      </div>
-      <div class="modal-form-group">
-        <label for="total-usdt-input">Bugünkü Toplam USDT:</label>
-        <input type="number" step="0.01" id="total-usdt-input" placeholder="Ör: 1000" />
-      </div>
-      <div class="modal-form-group">
-        <label for="prev-usdt-input">Dünkü Toplam USDT:</label>
-        <input type="number" step="0.01" id="prev-usdt-input" placeholder="Ör: 950" />
-      </div>
-      <div class="modal-form-group">
-        <label for="gider-input">Gider (USDT):</label>
-        <input type="number" step="0.01" id="gider-input" placeholder="Ör: 10" />
-      </div>
-
-      <div class="modal-form-actions">
-        <button class="cancel-btn" id="accounting-modal-cancel">İptal</button>
-        <button class="save-btn" id="accounting-modal-save">Kaydet</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 2) VERİ GEÇMİŞİ (TÜM KAYITLAR) MODALI -->
-  <div class="modal-overlay" id="history-modal-overlay">
-    <div class="modal-content">
-      <button class="modal-close-btn" id="history-modal-close">X</button>
-      <h2 class="modal-title">Tüm Kayıtlar</h2>
-      
-      <!-- History tablo -->
-      <table class="history-table" id="history-table">
-        <thead>
-          <tr>
-            <th>Tarih</th>
-            <th>Toplam USDT</th>
-            <th>Dünkü USDT</th>
-            <th>Ciro</th>
-            <th>Gider</th>
-            <th>Kâr</th>
-            <th>İşlemler</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Kayıtlar dinamik olarak buraya eklenecek -->
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- 2.1) VERİ GEÇMİŞİ -> GÜNCELLEME MODAL -->
-  <div class="modal-overlay" id="history-edit-modal-overlay">
-    <div class="modal-content">
-      <button class="modal-close-btn" id="history-edit-modal-close">X</button>
-      <h2 class="modal-title">Kayıt Düzenle</h2>
-      
-      <!-- Düzenleme formu -->
-      <div class="modal-form-group">
-        <label for="edit-date-input">Tarih (Değiştirilemez):</label>
-        <input type="date" id="edit-date-input" disabled />
-      </div>
-      <div class="modal-form-group">
-        <label for="edit-total-usdt-input">Bugünkü Toplam USDT:</label>
-        <input type="number" step="0.01" id="edit-total-usdt-input" />
-      </div>
-      <div class="modal-form-group">
-        <label for="edit-prev-usdt-input">Dünkü Toplam USDT:</label>
-        <input type="number" step="0.01" id="edit-prev-usdt-input" />
-      </div>
-      <div class="modal-form-group">
-        <label for="edit-gider-input">Gider (USDT):</label>
-        <input type="number" step="0.01" id="edit-gider-input" />
-      </div>
-
-      <div class="modal-form-actions">
-        <button class="cancel-btn" id="history-edit-modal-cancel">İptal</button>
-        <button class="update-btn" id="history-edit-modal-update">Güncelle</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 3) İSTATİSTİK MODALI (ORTALAMA CIRO/KÂR) -->
-  <div class="modal-overlay" id="stats-modal-overlay">
-    <div class="modal-content">
-      <button class="modal-close-btn" id="stats-modal-close">X</button>
-      <h2 class="modal-title">İstatistik</h2>
-      
-      <div class="stats-buttons">
-        <button class="range-btn" data-range="7">Son 7 Gün</button>
-        <button class="range-btn" data-range="30">Son 30 Gün</button>
-        <button class="range-btn" data-range="all">Tümü</button>
-      </div>
-      <div class="stats-content">
-        <!-- Hesaplanan sonuçların gösterildiği bölüm -->
-        <div class="stats-result" id="stats-result">
-          <!-- Dinamik doldurulacak -->
-          <div class="stats-line">Ortalama Ciro: --</div>
-          <div class="stats-line">Ortalama Kâr: --</div>
-          <div class="stats-line">Toplam Kayıt: --</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- Firebase (v9) -->
   <script type="module">
     /********************************************
-     * 1) Firebase Ayarları
+     * 1) Firebase Ayarları ve Başlatma
      ********************************************/
     import {
       initializeApp
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+
     import {
       getDatabase,
       ref,
-      get,
-      set,
-      update,
-      remove
+      get
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
     const firebaseConfig = {
@@ -512,42 +135,41 @@
       appId: "1:329584375052:web:14f73833b70fcba2508529",
       measurementId: "G-PX8GBF2Y1W"
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
     /********************************************
-     * 2) Coin Tablosu (Binance & Paribu) - Global
+     * 2) Global coinData Değişkeni
      ********************************************/
-    let coinData = {};  // "ATM" => { binance: {...}, paribu: {...} }
+    let coinData = {}; // "ATM" => { "binance": {...}, "paribu": {...} }
 
     /********************************************
-     * 3) Firebase'den Veri Çekme (Coin)
+     * 3) Firebase'den Veri Çekme
      ********************************************/
-    async function fetchCoinData() {
+    async function fetchFromFirebase() {
       try {
-        const snapshot = await get(ref(db, "/"));
+        const snapshot = await get(ref(db, "/")); // Tüm kök veriyi çek
         if (snapshot.exists()) {
-          const allData = snapshot.val(); 
+          const allCoins = snapshot.val(); // "atm_data", "city_data", ...
           const newDict = {};
 
-          // "accounting" gibi başka veriler de olabilir, coin adları "_data" ile bitiyor.
-          for (const [key, value] of Object.entries(allData)) {
-            if (key.includes("_data")) {
-              const coinName = key.toUpperCase().replace("_DATA", "");
-              newDict[coinName] = value;
-            }
+          // Örn: "ATM_DATA" -> "ATM"
+          for (const [key, dataForCoin] of Object.entries(allCoins)) {
+            const coinName = key.toUpperCase().replace("_DATA", "");
+            newDict[coinName] = dataForCoin; // { binance: {...}, paribu: {...} }
           }
           coinData = newDict;
         }
       } catch (err) {
-        console.error("Coin verisi okunamadı:", err);
+        console.error("Firebase okuma hatası:", err);
       }
     }
 
     /********************************************
-     * 4) Coin Tablosunu Güncelle
+     * 4) Tabloyu Güncelleme
      ********************************************/
-    function updateCoinTable() {
+    function updateTable() {
       const tbody = document.querySelector("#price-table tbody");
       tbody.innerHTML = "";
 
@@ -567,49 +189,53 @@
           let paribuBuy  = paribuInfo.buy_price  || "0";
           let paribuSell = paribuInfo.sell_price || "0";
 
-          // String -> Number
+          // String -> Number dönüşümleri
           binanceBid = parseFloat(String(binanceBid).replace(",", "."));
           binanceAsk = parseFloat(String(binanceAsk).replace(",", "."));
           paribuBuy  = parseFloat(String(paribuBuy).replace(",", "."));
           paribuSell = parseFloat(String(paribuSell).replace(",", "."));
 
-          // Geçersiz veri atla
+          // Veri kontrol
           if (!binanceBid || !binanceAsk || !paribuBuy || !paribuSell) {
-            continue;
+            continue; // 0 veya geçersiz
           }
 
           // (A) Yüksek Fiyat
           let highPrice, highColor;
           if (paribuBuy > binanceBid) {
             highPrice = paribuBuy;
-            highColor = "bg-green";   // parlak yeşil
+            highColor = "green";   // Paribu
           } else {
             highPrice = binanceBid;
-            highColor = "bg-yellow";  // parlak sarı
+            highColor = "yellow";  // Binance
           }
 
           // (B) Düşük Fiyat
           let lowPrice, lowColor;
           if (paribuSell > binanceAsk) {
             lowPrice = binanceAsk;
-            lowColor = "bg-yellow";   // parlak sarı
+            lowColor = "yellow";   // Binance
           } else {
             lowPrice = paribuSell;
-            lowColor = "bg-green";    // parlak yeşil
+            lowColor = "green";    // Paribu
           }
 
-          // Aynı borsa ise atla
+          // Aynı renk ise (aynı borsa) tabloya ekleme
           if (highColor === lowColor) {
             continue;
           }
 
-          // Fark
+          // Fark hesaplama
           const fark = highPrice - lowPrice;
-          if (lowPrice <= 0) continue;
-
+          if (lowPrice <= 0) {
+            continue;
+          }
           const farkPercent = (fark / lowPrice) * 100;
-          if (farkPercent <= 0) continue;
+          if (farkPercent <= 0) {
+            continue;
+          }
 
+          // Diziye ekle
           rowDataArr.push([
             farkPercent,
             coinName,
@@ -623,327 +249,48 @@
         }
       }
 
-      // Büyük fark en üstte
+      // Büyük fark en üstte: büyükten küçüğe sıralama
       rowDataArr.sort((a, b) => b[0] - a[0]);
 
       // Satırları oluştur
-      rowDataArr.forEach(([farkPercent, coinName, lowPrice, highPrice, lowColor, highColor]) => {
-        const tr = document.createElement("tr");
+      for (const rowData of rowDataArr) {
+        const [farkPercent, coinName, lowPrice, highPrice, lowColor, highColor] = rowData;
 
-        // Coin adı
+        const row = document.createElement("tr");
+
+        // (1) Coin
         const coinTd = document.createElement("td");
         coinTd.textContent = coinName;
-        tr.appendChild(coinTd);
+        row.appendChild(coinTd);
 
-        // Düşük fiyat
+        // (2) Düşük Fiyat
         const lowTd = document.createElement("td");
         lowTd.textContent = lowPrice.toFixed(4);
-        lowTd.classList.add(lowColor); 
-        tr.appendChild(lowTd);
+        lowTd.style.backgroundColor = lowColor;
+        row.appendChild(lowTd);
 
-        // Yüksek fiyat
+        // (3) Yüksek Fiyat
         const highTd = document.createElement("td");
         highTd.textContent = highPrice.toFixed(4);
-        highTd.classList.add(highColor);
-        tr.appendChild(highTd);
+        highTd.style.backgroundColor = highColor;
+        row.appendChild(highTd);
 
-        // Fark (%)
+        // (4) Fark (%)
         const farkTd = document.createElement("td");
         farkTd.textContent = farkPercent.toFixed(2) + "%";
-        tr.appendChild(farkTd);
+        row.appendChild(farkTd);
 
-        tbody.appendChild(tr);
-      });
+        tbody.appendChild(row);
+      }
     }
 
     /********************************************
-     * 5) Coin Tablosu Güncelleme Döngüsü
+     * 5) Her 70 ms'de bir Veri Çek ve Güncelle
      ********************************************/
     setInterval(async () => {
-      await fetchCoinData();  // Firebase'den coin verileri
-      updateCoinTable();      // Tabloyu güncelle
+      await fetchFromFirebase(); // Firebase'den veriyi al
+      updateTable();             // Tabloyu güncelle
     }, 70);
-
-    /********************************************
-     * 6) Muhasebe Ekle (MODAL)
-     ********************************************/
-    const accountingAddIcon = document.getElementById("accounting-add-icon");
-    const accountingModalOverlay = document.getElementById("accounting-modal-overlay");
-    const accountingModalClose = document.getElementById("accounting-modal-close");
-    const accountingModalCancel = document.getElementById("accounting-modal-cancel");
-    const accountingModalSave = document.getElementById("accounting-modal-save");
-
-    accountingAddIcon.addEventListener("click", () => {
-      accountingModalOverlay.style.display = "flex";
-    });
-    function closeAccountingModal() {
-      accountingModalOverlay.style.display = "none";
-    }
-    accountingModalClose.addEventListener("click", closeAccountingModal);
-    accountingModalCancel.addEventListener("click", closeAccountingModal);
-
-    // Kaydet
-    accountingModalSave.addEventListener("click", async () => {
-      const dateValue   = (document.getElementById("date-input").value || "").trim();
-      const totalUsdt   = parseFloat(document.getElementById("total-usdt-input").value) || 0;
-      const prevUsdt    = parseFloat(document.getElementById("prev-usdt-input").value)  || 0;
-      const gider       = parseFloat(document.getElementById("gider-input").value)      || 0;
-
-      if (!dateValue) {
-        alert("Lütfen geçerli bir tarih giriniz!");
-        return;
-      }
-
-      const ciro = totalUsdt - prevUsdt;
-      const kar  = ciro - gider;
-
-      try {
-        await set(ref(db, "accounting/" + dateValue), {
-          totalUsdt,
-          previousUsdt: prevUsdt,
-          ciro,
-          gider,
-          kar
-        });
-        alert("Kayıt başarıyla eklendi.");
-        closeAccountingModal();
-      } catch (err) {
-        console.error("Muhasebe ekleme hatası:", err);
-        alert("Kayıt sırasında bir hata oluştu!");
-      }
-    });
-
-    /********************************************
-     * 7) Veri Geçmişi (Tüm Kayıtlar) MODAL
-     ********************************************/
-    const historyIcon = document.getElementById("history-icon");
-    const historyModalOverlay = document.getElementById("history-modal-overlay");
-    const historyModalClose = document.getElementById("history-modal-close");
-    const historyTableBody = document.querySelector("#history-table tbody");
-
-    historyIcon.addEventListener("click", async () => {
-      // Açmadan önce verileri çek
-      await loadAllAccountingRecords();
-      historyModalOverlay.style.display = "flex";
-    });
-    historyModalClose.addEventListener("click", () => {
-      historyModalOverlay.style.display = "none";
-    });
-
-    // Tüm kayıtları çekip tabloya bas
-    async function loadAllAccountingRecords() {
-      historyTableBody.innerHTML = "";
-      try {
-        const snapshot = await get(ref(db, "accounting"));
-        if (snapshot.exists()) {
-          const data = snapshot.val(); // { "2025-03-01": {...}, "2025-03-02": {...} }
-
-          // Tarihe göre sırala (eski->yeni)
-          const dates = Object.keys(data).sort();
-          for (const dateStr of dates) {
-            const rec = data[dateStr];
-            const tr = document.createElement("tr");
-
-            // Hücreler
-            const tdDate = document.createElement("td");
-            tdDate.textContent = dateStr;
-            tr.appendChild(tdDate);
-
-            const tdTotal = document.createElement("td");
-            tdTotal.textContent = rec.totalUsdt.toFixed(2);
-            tr.appendChild(tdTotal);
-
-            const tdPrev = document.createElement("td");
-            tdPrev.textContent = rec.previousUsdt.toFixed(2);
-            tr.appendChild(tdPrev);
-
-            const tdCiro = document.createElement("td");
-            tdCiro.textContent = rec.ciro.toFixed(2);
-            tr.appendChild(tdCiro);
-
-            const tdGider = document.createElement("td");
-            tdGider.textContent = rec.gider.toFixed(2);
-            tr.appendChild(tdGider);
-
-            const tdKar = document.createElement("td");
-            tdKar.textContent = rec.kar.toFixed(2);
-            tr.appendChild(tdKar);
-
-            // İşlemler sütunu
-            const tdActions = document.createElement("td");
-            const editBtn = document.createElement("button");
-            editBtn.classList.add("edit-btn");
-            editBtn.textContent = "Düzenle";
-            editBtn.addEventListener("click", () => openEditModal(dateStr, rec));
-            tdActions.appendChild(editBtn);
-
-            const delBtn = document.createElement("button");
-            delBtn.classList.add("delete-btn");
-            delBtn.textContent = "Sil";
-            delBtn.addEventListener("click", () => deleteRecord(dateStr));
-            tdActions.appendChild(delBtn);
-
-            tr.appendChild(tdActions);
-            historyTableBody.appendChild(tr);
-          }
-        }
-      } catch (err) {
-        console.error("Kayıtlar yüklenirken hata:", err);
-      }
-    }
-
-    // Silme fonksiyonu
-    async function deleteRecord(dateStr) {
-      if (!confirm(`${dateStr} tarihli kaydı silmek istediğinize emin misiniz?`)) {
-        return;
-      }
-      try {
-        await remove(ref(db, "accounting/" + dateStr));
-        alert("Kayıt silindi.");
-        await loadAllAccountingRecords(); // tabloyu yeniden yükle
-      } catch (err) {
-        console.error("Silme hatası:", err);
-        alert("Silme sırasında bir hata oluştu!");
-      }
-    }
-
-    /********************************************
-     * 7.1) Veri Geçmişi Düzenleme (Edit) MODAL
-     ********************************************/
-    const historyEditModalOverlay = document.getElementById("history-edit-modal-overlay");
-    const historyEditModalClose = document.getElementById("history-edit-modal-close");
-    const historyEditModalCancel = document.getElementById("history-edit-modal-cancel");
-    const historyEditModalUpdate = document.getElementById("history-edit-modal-update");
-
-    // Form elemanları
-    const editDateInput     = document.getElementById("edit-date-input");
-    const editTotalUsdt     = document.getElementById("edit-total-usdt-input");
-    const editPrevUsdt      = document.getElementById("edit-prev-usdt-input");
-    const editGider         = document.getElementById("edit-gider-input");
-
-    let currentEditDate = null;
-
-    function openEditModal(dateStr, record) {
-      currentEditDate = dateStr;
-      editDateInput.value = dateStr;
-      editTotalUsdt.value = record.totalUsdt.toFixed(2);
-      editPrevUsdt.value  = record.previousUsdt.toFixed(2);
-      editGider.value     = record.gider.toFixed(2);
-
-      historyEditModalOverlay.style.display = "flex";
-    }
-    function closeEditModal() {
-      historyEditModalOverlay.style.display = "none";
-    }
-    historyEditModalClose.addEventListener("click", closeEditModal);
-    historyEditModalCancel.addEventListener("click", closeEditModal);
-
-    // Güncelleme butonu
-    historyEditModalUpdate.addEventListener("click", async () => {
-      if (!currentEditDate) return;
-
-      // Değerleri al
-      const totalVal = parseFloat(editTotalUsdt.value) || 0;
-      const prevVal  = parseFloat(editPrevUsdt.value)  || 0;
-      const giderVal = parseFloat(editGider.value)     || 0;
-
-      // ciro, kar hesapla
-      const ciroVal = totalVal - prevVal;
-      const karVal  = ciroVal - giderVal;
-
-      // Firebase güncelle
-      try {
-        await update(ref(db, "accounting/" + currentEditDate), {
-          totalUsdt: totalVal,
-          previousUsdt: prevVal,
-          ciro: ciroVal,
-          gider: giderVal,
-          kar: karVal
-        });
-        alert("Kayıt güncellendi.");
-        closeEditModal();
-        await loadAllAccountingRecords();
-      } catch (err) {
-        console.error("Güncelleme hatası:", err);
-        alert("Kayıt güncellenirken hata oluştu!");
-      }
-    });
-
-    /********************************************
-     * 8) İstatistik MODALI (Ortalama Ciro/Kâr)
-     ********************************************/
-    const statsIcon = document.getElementById("stats-icon");
-    const statsModalOverlay = document.getElementById("stats-modal-overlay");
-    const statsModalClose = document.getElementById("stats-modal-close");
-    const statsResultDiv = document.getElementById("stats-result");
-
-    statsIcon.addEventListener("click", async () => {
-      // Varsayılan "all"
-      await loadStatsData("all");
-      statsModalOverlay.style.display = "flex";
-    });
-    statsModalClose.addEventListener("click", () => {
-      statsModalOverlay.style.display = "none";
-    });
-
-    // Butonlar (7, 30, all)
-    document.querySelectorAll(".range-btn").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const range = btn.getAttribute("data-range");
-        await loadStatsData(range);
-      });
-    });
-
-    // İstatistik verisi çek + hesapla
-    async function loadStatsData(range) {
-      try {
-        const snapshot = await get(ref(db, "accounting"));
-        if (snapshot.exists()) {
-          const data = snapshot.val(); // { date: {...}, ...}
-          const dates = Object.keys(data).sort();
-          
-          let filteredDates;
-          if (range === "all") {
-            filteredDates = dates;
-          } else {
-            const num = parseInt(range, 10);
-            filteredDates = dates.slice(-num);
-          }
-
-          let ciroSum = 0;
-          let karSum  = 0;
-          let count   = 0;
-
-          filteredDates.forEach(dateStr => {
-            const rec = data[dateStr];
-            ciroSum += rec.ciro;
-            karSum  += rec.kar;
-            count++;
-          });
-
-          let avgCiro = 0;
-          let avgKar  = 0;
-          if (count > 0) {
-            avgCiro = ciroSum / count;
-            avgKar  = karSum / count;
-          }
-
-          // Göster
-          statsResultDiv.innerHTML = `
-            <div class="stats-line">Ortalama Ciro: <strong>${avgCiro.toFixed(2)}</strong> USDT</div>
-            <div class="stats-line">Ortalama Kâr: <strong>${avgKar.toFixed(2)}</strong> USDT</div>
-            <div class="stats-line">Toplam Kayıt: <strong>${count}</strong></div>
-          `;
-        } else {
-          statsResultDiv.innerHTML = `
-            <div class="stats-line">Hiç kayıt yok!</div>
-          `;
-        }
-      } catch (err) {
-        console.error("İstatistik verisi okunamadı:", err);
-        statsResultDiv.innerHTML = `<div class="stats-line">Hata oluştu!</div>`;
-      }
-    }
   </script>
 </body>
 </html>
