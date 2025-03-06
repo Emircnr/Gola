@@ -66,7 +66,7 @@
       cursor: pointer;
       width: 42px;
       height: 42px;
-      opacity: 0.8;
+      opacity: 0.85;
       transition: opacity 0.2s;
     }
     .icon-btn:hover {
@@ -103,12 +103,15 @@
     tr {
       height: 70px;
     }
-    /* Fiyat hücreleri renklendirirken yazı rengi okunabilir olsun */
-    td[data-bg="yellow"] {
-      background-color: #fff9c4;
+
+    /* Fiyat hücrelerini parlak renklerle vurgula (eskisi gibi) */
+    .bg-green {
+      background-color: #7CFC00; /* parlak yeşil */
+      color: #000;
     }
-    td[data-bg="green"] {
-      background-color: #c8e6c9;
+    .bg-yellow {
+      background-color: #FFFF00; /* parlak sarı */
+      color: #000;
     }
 
     /********************************************
@@ -148,7 +151,7 @@
       display: none; /* başlangıçta kapalı */
       align-items: center;
       justify-content: center;
-      z-index: 999;
+      z-index: 9999;
     }
     .modal-content {
       background: #fff;
@@ -157,6 +160,7 @@
       padding: 20px 30px;
       border-radius: 8px;
       position: relative;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
     .modal-close-btn {
       position: absolute;
@@ -312,9 +316,11 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       padding: 1rem;
+      text-align: center;
     }
     .stats-line {
       margin-bottom: 0.5rem;
+      font-weight: 500;
     }
   </style>
 </head>
@@ -456,7 +462,7 @@
     </div>
   </div>
 
-  <!-- 3) İSTATİSTİK MODALI -->
+  <!-- 3) İSTATİSTİK MODALI (ORTALAMA CIRO/KÂR) -->
   <div class="modal-overlay" id="stats-modal-overlay">
     <div class="modal-content">
       <button class="modal-close-btn" id="stats-modal-close">X</button>
@@ -576,20 +582,20 @@
           let highPrice, highColor;
           if (paribuBuy > binanceBid) {
             highPrice = paribuBuy;
-            highColor = "green";
+            highColor = "bg-green";   // parlak yeşil
           } else {
             highPrice = binanceBid;
-            highColor = "yellow";
+            highColor = "bg-yellow";  // parlak sarı
           }
 
           // (B) Düşük Fiyat
           let lowPrice, lowColor;
           if (paribuSell > binanceAsk) {
             lowPrice = binanceAsk;
-            lowColor = "yellow";
+            lowColor = "bg-yellow";   // parlak sarı
           } else {
             lowPrice = paribuSell;
-            lowColor = "green";
+            lowColor = "bg-green";    // parlak yeşil
           }
 
           // Aynı borsa ise atla
@@ -632,13 +638,13 @@
         // Düşük fiyat
         const lowTd = document.createElement("td");
         lowTd.textContent = lowPrice.toFixed(4);
-        lowTd.setAttribute("data-bg", lowColor);
+        lowTd.classList.add(lowColor); 
         tr.appendChild(lowTd);
 
         // Yüksek fiyat
         const highTd = document.createElement("td");
         highTd.textContent = highPrice.toFixed(4);
-        highTd.setAttribute("data-bg", highColor);
+        highTd.classList.add(highColor);
         tr.appendChild(highTd);
 
         // Fark (%)
@@ -778,7 +784,6 @@
             tdActions.appendChild(delBtn);
 
             tr.appendChild(tdActions);
-
             historyTableBody.appendChild(tr);
           }
         }
@@ -865,7 +870,7 @@
     });
 
     /********************************************
-     * 8) İstatistik MODALI
+     * 8) İstatistik MODALI (Ortalama Ciro/Kâr)
      ********************************************/
     const statsIcon = document.getElementById("stats-icon");
     const statsModalOverlay = document.getElementById("stats-modal-overlay");
