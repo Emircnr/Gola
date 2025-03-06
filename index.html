@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Fiyat Karşılaştırma (Tüm Coinler)</title>
+  <!-- Mobil cihazlarda responsive görünüm -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    /* Sıfırlama ve temel ayarlar */
+    html, body {
+      margin: 0; 
+      padding: 0;
+      box-sizing: border-box;
+      background: #f0f0f0;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Konteyner - pencere benzeri */
+    .window-container {
+      width: 100%;
+      max-width: 1400px;     /* Geniş ekranlarda daha fazla genişleyebilir */
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #ccc;
+      min-height: 100vh;     /* Ekran yüksekliğini doldursun */
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Başlık (boşluk yok) */
+    .window-title {
+      margin: 0;
+      padding: 0;           /* Üst-alt boşluğu sıfır */
+      text-align: center;
+      font-weight: bold;
+      font-size: 2rem;      /* Daha büyük başlık yazısı */
+      background-color: #e0e0e0;
+      border-bottom: 1px solid #ccc;
+      line-height: 1.2;     /* Satır yüksekliği */
+    }
+
+    /* Tablo alanı */
+    .table-container {
+      flex: 1;              /* Kalan alanı kaplasın */
+      margin: 0;            /* Boşlukları sıfırla */
+      padding: 0;           /* Yukarı-aşağı boşluk yok */
+      overflow-x: auto;     /* Taşma olursa yatay kaydırma */
+    }
+
+    /* Tablo kendisi */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 1.8rem; /* Büyük yazı */
+      background: #fff;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 15px;         /* Hücre iç boşluğu */
+      text-align: center;
+      font-weight: bold;     /* Kalın yazı */
+    }
+
+    th {
+      background-color: #444;
+      color: #fff;
+    }
+
+    /* Satır yüksekliği ayarı */
+    tr {
+      height: 60px; /* Daha yüksek satırlar */
+    }
+
+    /* Mobil uyum - daha küçük ekranlar için boyutu biraz düşürelim */
+    @media (max-width: 768px) {
+      .window-title {
+        font-size: 1.6rem;  /* Başlığı biraz küçült */
+      }
+      table {
+        font-size: 1.4rem;  /* Tablo yazı boyutu */
+      }
+      th, td {
+        padding: 10px;
+      }
+      tr {
+        height: 50px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="window-container">
+    <div class="window-title">Fiyat Karşılaştırma (Tüm Coinler)</div>
+
+    <div class="table-container">
+      <table id="price-table">
+        <thead>
+          <tr>
+            <th>Coin</th>
+            <th>Düşük Fiyat</th>
+            <th>Yüksek Fiyat</th>
+            <th>Fark (%)</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Dinamik satırlar buraya gelecek -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Firebase (v9) -->
+  <script type="module">
+    /********************************************
+     * 1) Firebase Ayarları ve Başlatma
+     ********************************************/
+    import {
+      initializeApp
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+
+    import {
+      getDatabase,
+      ref,
+      get
+    } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyBpLTAjO5IouPswrBTAORhLO2XbcrmtpsQ",
+      authDomain: "selenium-b9c68.firebaseapp.com",
+      databaseURL: "https://selenium-b9c68-default-rtdb.firebaseio.com",
+      projectId: "selenium-b9c68",
+      storageBucket: "selenium-b9c68.firebasestorage.app",
+      messagingSenderId: "329584375052",
+      appId: "1:329584375052:web:14f73833b70fcba2508529",
+      measurementId: "G-PX8GBF2Y1W"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    /********************************************
+     * 2) Global coinData Değişkeni
+     ********************************************/
+    let coinData = {}; // "ATM" => { "binance": {...}, "paribu": {...} }
+
+    /********************************************
+     * 3) Firebase'den Veri Çekme
+     ********************************************/
+    async function fetchFromFirebase() {
+      try {
+        const snapshot = await get(ref(db, "/")); // Tüm kök veriyi çek
+        if (snapshot.exists()) {
+          const allCoins = snapshot.val(); // "atm_data", "city_data", ...
+          const newDict = {};
+
+          // Örn: "ATM_DATA" -> "ATM"
+          for (const [key, dataForCoin] of Object.entries(allCoins)) {
+            const coinName = key.toUpperCase().replace("_DATA", "");
+            newDict[coinName] = dataForCoin; // { binance: {...}, paribu: {...} }
+          }
+          coinData = newDict;
+        }
+      } catch (err) {
+        console.error("Firebase okuma hatası:", err);
+      }
+    }
+
+    /********************************************
+     * 4) Tabloyu Güncelleme
+     ********************************************/
+    function updateTable() {
+      const tbody = document.querySelector("#price-table tbody");
+      tbody.innerHTML = "";
+
+      // Sıralamak için geçici dizi: [farkPercent, coinName, lowPrice, highPrice, lowColor, highColor]
+      const rowDataArr = [];
+
+      for (const [coinName, exchDict] of Object.entries(coinData)) {
+        try {
+          // Binance verileri
+          const binanceInfo = exchDict.binance || {};
+          const keyPrefix = coinName.toLowerCase();
+          let binanceBid = binanceInfo[`${keyPrefix}_tl_bid`] || 0;
+          let binanceAsk = binanceInfo[`${keyPrefix}_tl_ask`] || 0;
+
+          // Paribu verileri
+          const paribuInfo = exchDict.paribu || {};
+          let paribuBuy  = paribuInfo.buy_price  || "0";
+          let paribuSell = paribuInfo.sell_price || "0";
+
+          // String -> Number dönüşümleri
+          binanceBid = parseFloat(String(binanceBid).replace(",", "."));
+          binanceAsk = parseFloat(String(binanceAsk).replace(",", "."));
+          paribuBuy  = parseFloat(String(paribuBuy).replace(",", "."));
+          paribuSell = parseFloat(String(paribuSell).replace(",", "."));
+
+          // Veri kontrol
+          if (!binanceBid || !binanceAsk || !paribuBuy || !paribuSell) {
+            continue; // 0 veya geçersiz
+          }
+
+          // (A) Yüksek Fiyat
+          let highPrice, highColor;
+          if (paribuBuy > binanceBid) {
+            highPrice = paribuBuy;
+            highColor = "green";   // Paribu
+          } else {
+            highPrice = binanceBid;
+            highColor = "yellow";  // Binance
+          }
+
+          // (B) Düşük Fiyat
+          let lowPrice, lowColor;
+          if (paribuSell > binanceAsk) {
+            lowPrice = binanceAsk;
+            lowColor = "yellow";   // Binance
+          } else {
+            lowPrice = paribuSell;
+            lowColor = "green";    // Paribu
+          }
+
+          // Aynı renk ise (aynı borsa) tabloya ekleme
+          if (highColor === lowColor) {
+            continue;
+          }
+
+          // Fark hesaplama
+          const fark = highPrice - lowPrice;
+          if (lowPrice <= 0) {
+            continue;
+          }
+          const farkPercent = (fark / lowPrice) * 100;
+          if (farkPercent <= 0) {
+            continue;
+          }
+
+          // Diziye ekle
+          rowDataArr.push([
+            farkPercent,
+            coinName,
+            lowPrice,
+            highPrice,
+            lowColor,
+            highColor
+          ]);
+        } catch (err) {
+          console.warn(`${coinName} hesaplanırken hata:`, err);
+        }
+      }
+
+      // Büyük fark en üstte: büyükten küçüğe sıralama
+      rowDataArr.sort((a, b) => b[0] - a[0]);
+
+      // Satırları oluştur
+      for (const rowData of rowDataArr) {
+        const [farkPercent, coinName, lowPrice, highPrice, lowColor, highColor] = rowData;
+
+        const row = document.createElement("tr");
+
+        // (1) Coin
+        const coinTd = document.createElement("td");
+        coinTd.textContent = coinName;
+        row.appendChild(coinTd);
+
+        // (2) Düşük Fiyat
+        const lowTd = document.createElement("td");
+        lowTd.textContent = lowPrice.toFixed(4);
+        lowTd.style.backgroundColor = lowColor;
+        row.appendChild(lowTd);
+
+        // (3) Yüksek Fiyat
+        const highTd = document.createElement("td");
+        highTd.textContent = highPrice.toFixed(4);
+        highTd.style.backgroundColor = highColor;
+        row.appendChild(highTd);
+
+        // (4) Fark (%)
+        const farkTd = document.createElement("td");
+        farkTd.textContent = farkPercent.toFixed(2) + "%";
+        row.appendChild(farkTd);
+
+        tbody.appendChild(row);
+      }
+    }
+
+    /********************************************
+     * 5) Her 70 ms'de bir Veri Çek ve Güncelle
+     ********************************************/
+    setInterval(async () => {
+      await fetchFromFirebase(); // Firebase'den veriyi al
+      updateTable();             // Tabloyu güncelle
+    }, 70);
+  </script>
+</body>
+</html>
