@@ -2,83 +2,123 @@
 <html lang="tr">
 <head>
   <meta charset="UTF-8" />
-  <title>Fiyat Karşılaştırma (Tüm Coinler)</title>
-  <!-- Mobil cihazlarda responsive görünüm -->
+  <title>Fiyat Karşılaştırma & Muhasebe</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Örnek font ve temel sıfırlama -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap">
+  
+  <!-- Chart.js (istatistik için) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
   <style>
-    /* Sıfırlama ve temel ayarlar */
-    html, body {
-      margin: 0; 
-      padding: 0;
+    /********************************************
+     * Temel Sıfırlama ve Yazı Tipi
+     ********************************************/
+    * {
       box-sizing: border-box;
-      background: #f0f0f0;
-      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      font-family: 'Roboto', sans-serif;
+      background-color: #f0f0f0;
     }
 
-    /* Konteyner - pencere benzeri */
+    /********************************************
+     * Konteyner
+     ********************************************/
     .window-container {
-      width: 100%;
-      max-width: 1400px;     /* Geniş ekranlarda daha fazla genişleyebilir */
+      max-width: 1400px;
       margin: 0 auto;
-      background: #fff;
-      border: 1px solid #ccc;
-      min-height: 100vh;     /* Ekran yüksekliğini doldursun */
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
+      background: #fff;
+      border: 1px solid #ccc;
+      position: relative; /* sağ üst simgeler için */
     }
 
-    /* Başlık (boşluk yok) */
-    .window-title {
-      margin: 0;
-      padding: 0;           /* Üst-alt boşluğu sıfır */
-      text-align: center;
-      font-weight: bold;
-      font-size: 2rem;      /* Daha büyük başlık yazısı */
+    /********************************************
+     * Üst Başlık (Tablo Adı + İkonlar)
+     ********************************************/
+    .header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center; /* ortada */
       background-color: #e0e0e0;
       border-bottom: 1px solid #ccc;
-      line-height: 1.2;     /* Satır yüksekliği */
+      position: relative;
+    }
+    .window-title {
+      margin: 0;
+      padding: 1rem;
+      text-align: center;
+      font-weight: bold;
+      font-size: 2rem;
+      line-height: 1.2;
+    }
+    /* Sağ üst ikonların bulunduğu kapsayıcı */
+    .icons-container {
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      gap: 15px;
+    }
+    .icon-btn {
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      opacity: 0.8;
+      transition: opacity 0.2s;
+    }
+    .icon-btn:hover {
+      opacity: 1;
     }
 
-    /* Tablo alanı */
+    /********************************************
+     * Tablo Alanı
+     ********************************************/
     .table-container {
-      flex: 1;              /* Kalan alanı kaplasın */
-      margin: 0;            /* Boşlukları sıfırla */
-      padding: 0;           /* Yukarı-aşağı boşluk yok */
-      overflow-x: auto;     /* Taşma olursa yatay kaydırma */
+      flex: 1;
+      overflow-x: auto;
     }
-
-    /* Tablo kendisi */
     table {
       width: 100%;
       border-collapse: collapse;
-      font-size: 1.8rem; /* Büyük yazı */
+      font-size: 1.8rem;
       background: #fff;
+      min-width: 600px;
     }
-
     th, td {
       border: 1px solid #ddd;
-      padding: 15px;         /* Hücre iç boşluğu */
+      padding: 15px;
       text-align: center;
-      font-weight: bold;     /* Kalın yazı */
+      font-weight: 500;
     }
-
     th {
       background-color: #444;
       color: #fff;
+      font-weight: 700;
     }
-
-    /* Satır yüksekliği ayarı */
     tr {
-      height: 60px; /* Daha yüksek satırlar */
+      height: 60px;
     }
 
-    /* Mobil uyum - daha küçük ekranlar için boyutu biraz düşürelim */
+    /********************************************
+     * Responsive (mobil) ayarlar
+     ********************************************/
     @media (max-width: 768px) {
       .window-title {
-        font-size: 1.6rem;  /* Başlığı biraz küçült */
+        font-size: 1.6rem;
       }
       table {
-        font-size: 1.4rem;  /* Tablo yazı boyutu */
+        font-size: 1.4rem;
       }
       th, td {
         padding: 10px;
@@ -86,13 +126,187 @@
       tr {
         height: 50px;
       }
+      .icons-container {
+        gap: 10px;
+      }
+      .icon-btn {
+        width: 28px;
+        height: 28px;
+      }
     }
+
+    /********************************************
+     * MODAL - Muhasebe Girişi
+     ********************************************/
+    .modal-overlay {
+      position: fixed;
+      top: 0; 
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      display: none; /* başlangıçta gizli */
+      align-items: center;
+      justify-content: center;
+      z-index: 999; /* tablo üzerinde görünsün */
+    }
+    .modal-content {
+      background: #fff;
+      width: 90%;
+      max-width: 500px;
+      padding: 20px;
+      border-radius: 8px;
+      position: relative;
+    }
+    .modal-close-btn {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      background: #ccc;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 8px;
+    }
+    .modal-title {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .modal-form-group {
+      margin-bottom: 1rem;
+      display: flex;
+      flex-direction: column;
+    }
+    .modal-form-group label {
+      margin-bottom: 0.4rem;
+      font-weight: 500;
+    }
+    .modal-form-group input {
+      padding: 0.5rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    .modal-form-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+    .save-btn, .cancel-btn {
+      cursor: pointer;
+      padding: 0.6rem 1.2rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 4px;
+      transition: background-color 0.2s;
+    }
+    .save-btn {
+      background-color: #4caf50;
+      color: #fff;
+    }
+    .save-btn:hover {
+      background-color: #43a047;
+    }
+    .cancel-btn {
+      background-color: #f44336;
+      color: #fff;
+    }
+    .cancel-btn:hover {
+      background-color: #e53935;
+    }
+
+    /********************************************
+     * MODAL - İstatistik (Grafik)
+     ********************************************/
+    .stats-modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 999;
+    }
+    .stats-modal-content {
+      background: #fff;
+      width: 90%;
+      max-width: 600px;
+      padding: 20px;
+      border-radius: 8px;
+      position: relative;
+    }
+    .stats-modal-close-btn {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      background: #ccc;
+      border: none;
+      border-radius: 5px;
+      padding: 5px 8px;
+    }
+    .stats-modal-title {
+      font-size: 1.4rem;
+      font-weight: bold;
+      margin-bottom: 1rem;
+      text-align: center;
+    }
+    .stats-buttons {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 1rem;
+      justify-content: center;
+    }
+    .stats-btn {
+      cursor: pointer;
+      background: #2196f3;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem 1rem;
+      transition: background-color 0.2s;
+    }
+    .stats-btn:hover {
+      background-color: #1e88e5;
+    }
+    /* Grafik kapsayıcı */
+    .chart-container {
+      width: 100%;
+      height: 300px;
+    }
+
   </style>
 </head>
 <body>
   <div class="window-container">
-    <div class="window-title">Fiyat Karşılaştırma (Tüm Coinler)</div>
+    <!-- Üst başlık + ikonlar -->
+    <div class="header-bar">
+      <h1 class="window-title">Fiyat Karşılaştırma (Tüm Coinler)</h1>
+      <div class="icons-container">
+        <!-- Muhasebe ikonu -->
+        <img 
+          src="https://cdn-icons-png.flaticon.com/512/2845/2845603.png" 
+          class="icon-btn" 
+          id="accounting-icon"
+          title="Gün Sonu Muhasebe"
+          alt="Muhasebe İkonu" />
+        <!-- İstatistik ikonu -->
+        <img 
+          src="https://cdn-icons-png.flaticon.com/512/1828/1828778.png" 
+          class="icon-btn" 
+          id="stats-icon"
+          title="İstatistikler"
+          alt="İstatistik İkonu" />
+      </div>
+    </div>
 
+    <!-- Tablo Alanı -->
     <div class="table-container">
       <table id="price-table">
         <thead>
@@ -110,6 +324,56 @@
     </div>
   </div>
 
+  <!-- Muhasebe Modal (Gün Sonu Girişi) -->
+  <div class="modal-overlay" id="accounting-modal-overlay">
+    <div class="modal-content">
+      <button class="modal-close-btn" id="accounting-modal-close">X</button>
+      <h2 class="modal-title">Gün Sonu Muhasebe Kaydı</h2>
+      
+      <div class="modal-form-group">
+        <label for="date-input">Tarih Seç:</label>
+        <input type="date" id="date-input" />
+      </div>
+      <div class="modal-form-group">
+        <label for="total-usdt-input">Bugünkü Toplam USDT:</label>
+        <input type="number" step="0.01" id="total-usdt-input" placeholder="1000" />
+      </div>
+      <div class="modal-form-group">
+        <label for="prev-usdt-input">Dünkü Toplam USDT:</label>
+        <input type="number" step="0.01" id="prev-usdt-input" placeholder="950" />
+      </div>
+      <div class="modal-form-group">
+        <label for="gider-input">Gider (USDT):</label>
+        <input type="number" step="0.01" id="gider-input" placeholder="0" />
+      </div>
+
+      <div class="modal-form-actions">
+        <button class="cancel-btn" id="accounting-modal-cancel">İptal</button>
+        <button class="save-btn" id="accounting-modal-save">Kaydet</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- İstatistik Modal (Grafik) -->
+  <div class="stats-modal-overlay" id="stats-modal-overlay">
+    <div class="stats-modal-content">
+      <button class="stats-modal-close-btn" id="stats-modal-close">X</button>
+      <h2 class="stats-modal-title">Günlük Ciro İstatistikleri</h2>
+      
+      <!-- Haftalık, Aylık vb. butonlar -->
+      <div class="stats-buttons">
+        <button class="stats-btn" data-range="7">Haftalık</button>
+        <button class="stats-btn" data-range="30">Aylık</button>
+        <button class="stats-btn" data-range="all">Tümü</button>
+      </div>
+
+      <!-- Grafik Alanı -->
+      <div class="chart-container">
+        <canvas id="stats-chart"></canvas>
+      </div>
+    </div>
+  </div>
+
   <!-- Firebase (v9) -->
   <script type="module">
     /********************************************
@@ -122,7 +386,9 @@
     import {
       getDatabase,
       ref,
-      get
+      get,
+      set,
+      update
     } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-database.js";
 
     const firebaseConfig = {
@@ -140,24 +406,30 @@
     const db = getDatabase(app);
 
     /********************************************
-     * 2) Global coinData Değişkeni
+     * 2) Global Değişkenler
      ********************************************/
-    let coinData = {}; // "ATM" => { "binance": {...}, "paribu": {...} }
+    let coinData = {}; // "ATM" => { binance: {...}, paribu: {...} }
+
+    // İstatistik grafiğini oluşturmak için Chart nesnesi
+    let statsChart = null;
 
     /********************************************
-     * 3) Firebase'den Veri Çekme
+     * 3) Firebase'den Veri Çekme (Coin Tablosu)
      ********************************************/
     async function fetchFromFirebase() {
       try {
         const snapshot = await get(ref(db, "/")); // Tüm kök veriyi çek
         if (snapshot.exists()) {
-          const allCoins = snapshot.val(); // "atm_data", "city_data", ...
+          const allCoins = snapshot.val(); // Örn: { "atm_data": {...}, "city_data": {...}, ... }
           const newDict = {};
 
           // Örn: "ATM_DATA" -> "ATM"
           for (const [key, dataForCoin] of Object.entries(allCoins)) {
-            const coinName = key.toUpperCase().replace("_DATA", "");
-            newDict[coinName] = dataForCoin; // { binance: {...}, paribu: {...} }
+            // "accounting" gibi ek veriler var mı diye kontrol
+            if (key.includes("_data")) {
+              const coinName = key.toUpperCase().replace("_DATA", "");
+              newDict[coinName] = dataForCoin; // { binance: {...}, paribu: {...} }
+            }
           }
           coinData = newDict;
         }
@@ -167,7 +439,7 @@
     }
 
     /********************************************
-     * 4) Tabloyu Güncelleme
+     * 4) Tabloyu Güncelleme (Coin)
      ********************************************/
     function updateTable() {
       const tbody = document.querySelector("#price-table tbody");
@@ -197,7 +469,7 @@
 
           // Veri kontrol
           if (!binanceBid || !binanceAsk || !paribuBuy || !paribuSell) {
-            continue; // 0 veya geçersiz
+            continue; // 0 veya geçersiz veri
           }
 
           // (A) Yüksek Fiyat
@@ -220,7 +492,7 @@
             lowColor = "green";    // Paribu
           }
 
-          // Aynı renk ise (aynı borsa) tabloya ekleme
+          // Aynı borsa ise atla
           if (highColor === lowColor) {
             continue;
           }
@@ -285,12 +557,170 @@
     }
 
     /********************************************
-     * 5) Her 70 ms'de bir Veri Çek ve Güncelle
+     * 5) Periyodik Veri Çekme ve Güncelleme
      ********************************************/
     setInterval(async () => {
-      await fetchFromFirebase(); // Firebase'den veriyi al
+      await fetchFromFirebase(); // Firebase'den coin verilerini al
       updateTable();             // Tabloyu güncelle
     }, 70);
+
+    /********************************************
+     * 6) Muhasebe Modal Aç/Kapat İşlemleri
+     ********************************************/
+    const accountingIcon = document.getElementById("accounting-icon");
+    const accountingModalOverlay = document.getElementById("accounting-modal-overlay");
+    const accountingModalClose = document.getElementById("accounting-modal-close");
+    const accountingModalCancel = document.getElementById("accounting-modal-cancel");
+    const accountingModalSave = document.getElementById("accounting-modal-save");
+
+    accountingIcon.addEventListener("click", () => {
+      accountingModalOverlay.style.display = "flex"; 
+    });
+    accountingModalClose.addEventListener("click", closeAccountingModal);
+    accountingModalCancel.addEventListener("click", closeAccountingModal);
+
+    function closeAccountingModal() {
+      accountingModalOverlay.style.display = "none";
+    }
+
+    /********************************************
+     * 7) Muhasebe Kaydet - Firebase
+     ********************************************/
+    accountingModalSave.addEventListener("click", async () => {
+      const dateValue   = document.getElementById("date-input").value;
+      const totalUsdt   = parseFloat(document.getElementById("total-usdt-input").value) || 0;
+      const prevUsdt    = parseFloat(document.getElementById("prev-usdt-input").value)  || 0;
+      const gider       = parseFloat(document.getElementById("gider-input").value)      || 0;
+
+      if (!dateValue) {
+        alert("Lütfen geçerli bir tarih seçiniz!");
+        return;
+      }
+
+      // Ciro = totalUsdt - prevUsdt
+      const ciro = totalUsdt - prevUsdt;
+      // Kar = ciro - gider
+      const kar = ciro - gider;
+
+      // Firebase'e kaydet
+      const accountingRef = ref(db, "accounting/" + dateValue);
+      try {
+        await set(accountingRef, {
+          totalUsdt,
+          previousUsdt: prevUsdt,
+          ciro,
+          gider,
+          kar
+        });
+        alert("Muhasebe bilgisi kaydedildi!");
+        closeAccountingModal();
+      } catch (err) {
+        console.error("Muhasebe verileri kaydedilemedi:", err);
+        alert("Kaydetme hatası!");
+      }
+    });
+
+    /********************************************
+     * 8) İstatistik Modal Aç/Kapat
+     ********************************************/
+    const statsIcon = document.getElementById("stats-icon");
+    const statsModalOverlay = document.getElementById("stats-modal-overlay");
+    const statsModalClose = document.getElementById("stats-modal-close");
+
+    statsIcon.addEventListener("click", async () => {
+      // Modal aç
+      statsModalOverlay.style.display = "flex";
+      // Grafik verilerini çek
+      await loadStatsData("all"); // Tüm verileri göster
+    });
+    statsModalClose.addEventListener("click", () => {
+      statsModalOverlay.style.display = "none";
+    });
+
+    /********************************************
+     * 9) İstatistik Verileri Yükleme
+     ********************************************/
+    async function loadStatsData(range) {
+      // range "7", "30" veya "all"
+      try {
+        const snapshot = await get(ref(db, "accounting"));
+        if (snapshot.exists()) {
+          const data = snapshot.val();
+          // data: { "2025-03-01": {...}, "2025-03-02": {...}, ... }
+
+          // Tarihlere göre sırala (eski->yeni)
+          const sortedKeys = Object.keys(data).sort();
+
+          // range'e göre filtre
+          let filteredKeys;
+          if (range === "all") {
+            filteredKeys = sortedKeys;
+          } else {
+            // sayıdaysa son X kaydı al
+            const num = parseInt(range, 10);
+            filteredKeys = sortedKeys.slice(-num);
+          }
+
+          // Grafik için data seti
+          const labels = [];
+          const ciroData = [];
+          filteredKeys.forEach((dateStr) => {
+            labels.push(dateStr);
+            ciroData.push(data[dateStr].ciro);
+          });
+
+          renderChart(labels, ciroData);
+        }
+      } catch (err) {
+        console.error("İstatistik verisi okunamadı:", err);
+      }
+    }
+
+    /********************************************
+     * 10) Chart.js ile Grafik Oluşturma
+     ********************************************/
+    function renderChart(labels, ciroData) {
+      const ctx = document.getElementById("stats-chart").getContext("2d");
+      if (statsChart) {
+        statsChart.destroy();
+      }
+      statsChart = new Chart(ctx, {
+        type: "line",
+        data: {
+          labels: labels,
+          datasets: [
+            {
+              label: "Günlük Ciro (USDT)",
+              data: ciroData,
+              borderColor: "#2196f3",
+              backgroundColor: "rgba(33, 150, 243, 0.1)",
+              tension: 0.1,
+              fill: true
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false, 
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+    }
+
+    /********************************************
+     * 11) İstatistik Modal Butonları (Haftalık/Aylık/Tümü)
+     ********************************************/
+    document.querySelectorAll(".stats-btn").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        const range = btn.getAttribute("data-range");
+        await loadStatsData(range);
+      });
+    });
+
   </script>
 </body>
 </html>
