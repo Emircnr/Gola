@@ -11,7 +11,8 @@
 }
 *{box-sizing:border-box}
 html,body{height:100%;margin:0;background:linear-gradient(180deg,#0e172a,#0b1220);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-#app{min-height:100%;display:grid;grid-template-rows:auto auto 1fr auto}
+a{color:var(--accent);text-decoration:none}
+#app{min-height:100%;display:grid;grid-template-rows:auto auto auto 1fr auto}
 header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid var(--br);position:sticky;top:0;background:linear-gradient(180deg,#0f172a,#0b1220);z-index:5}
 header h1{margin:0;font-size:18px;font-weight:700}
 .badge{font-size:12px;padding:5px 8px;border-radius:999px;background:#13203a;border:1px solid var(--br);color:#bed0f2}
@@ -22,12 +23,12 @@ header h1{margin:0;font-size:18px;font-weight:700}
 .panel{margin:10px 14px;padding:12px;border:1px solid var(--br);border-radius:16px;background:linear-gradient(180deg,#101828,#0f1626)}
 .panel h2{margin:0 0 8px 0;font-size:15px}
 input,select{padding:8px;border-radius:10px;border:1px solid var(--br);background:#0b1324;color:var(--text)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px;margin:10px 14px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;margin:10px 14px}
 .card{padding:12px;border:1px solid var(--br);border-radius:16px;background:linear-gradient(180deg,#101828,#0f1626);display:flex;flex-direction:column;gap:10px}
 .card h3{margin:0;font-size:16px;display:flex;justify-content:space-between;align-items:center}
 .kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .kv .it{background:#0e1628;border:1px solid var(--br);border-radius:12px;padding:8px}
-.kv label{display:block;font-size:11px;color:var(--muted);margin-bottom:4px}
+.kv label{display:block;font-size:11px;color:#9fb0ca;margin-bottom:4px}
 .depth{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .depth-col{background:#0e1628;border:1px solid var(--br);border-radius:12px;padding:8px}
 .depth h4{margin:0 0 6px 0;font-size:12px;color:#9fb0ca}
@@ -44,6 +45,13 @@ hr.sep{border:none;border-top:1px dashed var(--br);margin:6px 0}
 .l{padding:4px 0;border-bottom:1px dashed #223356}
 footer{padding:10px 14px;border-top:1px solid var(--br);color:#9fb0ca}
 .empty{opacity:.85;text-align:center;padding:20px;border:2px dashed var(--br);border-radius:16px;margin:10px 14px}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.stat{background:#0e1628;border:1px solid var(--br);border-radius:14px;padding:10px}
+.stat h4{margin:0 0 6px 0;font-size:12px;color:#9fb0ca}
+.stat .v{font-size:18px;font-weight:700}
+.table{width:100%;border-collapse:collapse}
+.table th,.table td{border-bottom:1px dashed #1e2b47;padding:6px 8px;text-align:left;font-size:12px}
+.tag{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid var(--br);background:#0b1324;color:#a9bbd9}
 .warnbox{border:1px solid #614c22;background:#2b2212;color:#f7e4b5;border-radius:12px;padding:10px;margin:6px 0}
 </style>
 </head>
@@ -62,20 +70,33 @@ footer{padding:10px 14px;border-top:1px solid var(--br);color:#9fb0ca}
     </div>
   </header>
 
-  <!-- Anahtar & Proxy -->
+  <!-- API & Proxy -->
   <section class="panel">
     <h2>API & Proxy Ayarları</h2>
     <div class="warnbox">
-      <b>Güvenlik:</b> Secret Key <u>yalnızca tarayıcıda</u> imza için kullanılır, ağa gönderilmez. Binance’a çağrıyı senin belirlediğin
-      <b>Proxy URL</b> (Cloudflare Worker) ile iletiriz. Bu proxy sadece isteği <i>ileriye</i> yollar (Secret görmez).
+      <b>Önemli:</b> Tarayıcılar, Binance REST’e doğrudan çağrıya CORS engeli koyar. Bu yüzden
+      <b>Proxy URL</b> (Cloudflare Worker) zorunludur. Secret Key <u>tarayıcıdan çıkmaz</u>; imza burada üretilir.
     </div>
     <div class="row">
-      <input id="apiKey" placeholder="API Key" style="min-width:280px">
-      <input id="secKey" placeholder="Secret Key" style="min-width:280px">
-      <input id="proxyUrl" placeholder="Proxy URL (örn. https://senin-worker-adin.workers.dev)" style="min-width:360px">
+      <input id="apiKey" placeholder="API Key (mainnet)" style="min-width:260px">
+      <input id="secKey" placeholder="Secret Key" style="min-width:260px">
+      <input id="proxyUrl" placeholder="Proxy URL (örn. https://senin-worker.workers.dev)" style="min-width:360px">
       <label class="row" style="gap:6px"><input type="checkbox" id="remember"> <span class="small">Bu tarayıcıda sakla</span></label>
       <button class="btn blue" id="btnConnect">Bağlan & Doğrula</button>
       <button class="btn gray" id="btnClearKeys">Anahtarları Temizle</button>
+    </div>
+  </section>
+
+  <!-- PnL & İstatistik -->
+  <section class="panel">
+    <h2>Portföy & PnL</h2>
+    <div class="row statgrid">
+      <div class="stat"><h4>Gerçekleşen PnL (Toplam)</h4><div class="v" id="pnlTotal">0.000000</div></div>
+      <div class="stat"><h4>Bugün Gerçekleşen PnL</h4><div class="v" id="pnlToday">0.000000</div></div>
+      <div class="stat"><h4>Ücret Oranı (bps)</h4>
+        <div class="row"><input id="feeBps" type="number" step="0.1" value="10" style="width:100px"><span class="tag">varsayılan: 10 bps (= %0.10)</span></div>
+      </div>
+      <div class="stat"><h4>Toplam İşlem</h4><div class="v" id="tradeCount">0</div></div>
     </div>
   </section>
 
@@ -104,6 +125,27 @@ footer{padding:10px 14px;border-top:1px solid var(--br);color:#9fb0ca}
     <div id="empty" class="empty">Henüz coin eklenmedi. Yukarıdan sembol girip <b>Ekle</b>’ye tıklayın (örn. DYM/USDT).</div>
   </section>
 
+  <!-- İşlem geçmişi -->
+  <section class="panel">
+    <h2>İşlem Geçmişi</h2>
+    <div class="row" style="justify-content:space-between">
+      <span class="small">Her kapatılan işlem (BUY → SELL) burada kaydedilir ve tarayıcında saklanır.</span>
+      <div class="row">
+        <button class="btn small gray" id="btnExportCsv">CSV İndir</button>
+        <button class="btn small bad" id="btnClearTrades">Geçmişi Temizle</button>
+      </div>
+    </div>
+    <div style="overflow:auto">
+      <table class="table" id="tradeTable">
+        <thead><tr>
+          <th>Zaman</th><th>Sembol</th><th>Qty</th><th>Alış</th><th>Satış</th><th>Ücret (Tahmini)</th><th>PnL</th><th>PnL %</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Loglar -->
   <section id="log">
     <div class="row" style="justify-content:space-between">
       <div class="row">
@@ -117,14 +159,15 @@ footer{padding:10px 14px;border-top:1px solid var(--br);color:#9fb0ca}
 
   <footer>
     Strateji: seçili <b>Alım L#</b> ve <b>Satış L#</b> seviyelerine LIMIT emir. TTL, Slipaj ve Chase korumaları vardır.  
-    <b>Uyarı:</b> Gerçek işlemler risk içerir. Parametreleri küçük miktarlarla test ederek ilerleyin.
+    <b>Dikkat:</b> Gerçek işlemler risk içerir. Parametreleri küçük miktarlarla doğrula.
   </footer>
 </div>
 
 <script>
-/* ================== Yardımcılar ================== */
+/*** ====== Yardımcılar ====== ***/
 const $ = s => document.querySelector(s);
 const now = ()=>Date.now();
+const fmtTime = ts => new Date(ts).toLocaleString();
 const logBox = $("#logbox");
 function log(msg){
   const l = document.createElement('div'); l.className='l';
@@ -135,21 +178,17 @@ function log(msg){
 function saveLS(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
 function loadLS(k,d=null){ try{ const x=localStorage.getItem(k); return x?JSON.parse(x):d }catch{ return d }}
 
-/* ====== WebCrypto HMAC (Secret tarayıcıda kalır) ====== */
-let SECRET_RAW = ''; // kullanıcı girişinden
+/*** ====== WebCrypto HMAC (Secret tarayıcıda kalır) ====== ***/
+let SECRET_RAW = '';
 async function hmacHex(secret, message){
   const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey(
-    "raw", enc.encode(secret), {name:"HMAC", hash:"SHA-256"}, false, ["sign"]
-  );
+  const key = await crypto.subtle.importKey("raw", enc.encode(secret), {name:"HMAC", hash:"SHA-256"}, false, ["sign"]);
   const sig = await crypto.subtle.sign("HMAC", key, enc.encode(message));
   return [...new Uint8Array(sig)].map(b=>b.toString(16).padStart(2,'0')).join('');
 }
 
-/* ================== Proxy Arayüzü ================== */
-let API_KEY = '';
-let PROXY = ''; // örn: https://senin-worker.workers.dev
-
+/*** ====== Proxy (Cloudflare Worker) arayüzü ====== ***/
+let API_KEY = '', PROXY = '';
 async function proxyForward({method="GET", path="/api/v3/time", queryObj={}, signed=false}){
   const q = new URLSearchParams(queryObj);
   if(signed){
@@ -163,20 +202,13 @@ async function proxyForward({method="GET", path="/api/v3/time", queryObj={}, sig
   const text = await r.text();
   try{ return {ok:r.ok, data: JSON.parse(text)} } catch { return {ok:r.ok, data:text} }
 }
-
 async function checkAuth(){
   const r = await proxyForward({method:"GET", path:"/api/v3/account", queryObj:{}, signed:true});
-  if(r.ok){
-    $("#authTag").textContent = `Auth: OK`;
-    return true;
-  }else{
-    $("#authTag").textContent = `Auth: HATA`;
-    log(`Auth hata: ${JSON.stringify(r.data)}`);
-    return false;
-  }
+  if(r.ok){ $("#authTag").textContent="Auth: OK"; return true; }
+  $("#authTag").textContent="Auth: HATA"; log(`Auth hata: ${JSON.stringify(r.data)}`); return false;
 }
 
-/* ================== Exchange Info (tick/step) ================== */
+/*** ====== Exchange Info ====== ***/
 const ExInfo = {};
 async function getEx(symbol){
   if(ExInfo[symbol]) return ExInfo[symbol];
@@ -195,44 +227,83 @@ async function getEx(symbol){
 function roundPrice(p, tick){ const n = Math.round(p/tick); return Number((n*tick).toFixed(12)); }
 function floorQty(q, step){ const n = Math.floor(q/step); return Number((n*step).toFixed(12)); }
 
-/* ================== WS (Orderbook) ================== */
-function wsUrl(symbol){ return `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@depth5@100ms`; }
-
-/* ================== Emir Fonksiyonları ================== */
-async function placeOrder({symbol, side, type="LIMIT", price, quantity, timeInForce="GTC"}){
-  const queryObj = { symbol, side, type, timeInForce, price: String(price), quantity: String(quantity) };
+/*** ====== Emir Fonksiyonları ====== ***/
+async function placeOrder({symbol, side, price, quantity}){
+  const queryObj = { symbol, side, type:"LIMIT", timeInForce:"GTC", price:String(price), quantity:String(quantity) };
   const r = await proxyForward({method:"POST", path:"/api/v3/order", queryObj, signed:true});
   if(!r.ok) throw new Error(JSON.stringify(r.data));
-  return r.data;
+  return r.data; // {orderId,...}
 }
 async function cancelOrder({symbol, orderId}){
-  const q = { symbol, orderId: String(orderId) };
+  const q = { symbol, orderId:String(orderId) };
   const r = await proxyForward({method:"DELETE", path:"/api/v3/order", queryObj:q, signed:true});
   if(!r.ok) throw new Error(JSON.stringify(r.data));
   return r.data;
 }
 async function getOrder({symbol, orderId}){
-  const q = { symbol, orderId: String(orderId) };
+  const q = { symbol, orderId:String(orderId) };
   const r = await proxyForward({method:"GET", path:"/api/v3/order", queryObj:q, signed:true});
   if(!r.ok) throw new Error(JSON.stringify(r.data));
   return r.data;
 }
 
-/* ================== Bot Sınıfı ================== */
+/*** ====== TradeBook (kayıt & PnL) ====== ***/
+const TradeBook = {
+  key:'tradebook_v1',
+  data: loadLS('tradebook_v1', []),
+  feeBps: Number(loadLS('fee_bps', 10)), // 10 bps = 0.10%
+  add(t){ this.data.push(t); saveLS(this.key, this.data); this.render(); },
+  clear(){ this.data = []; saveLS(this.key, this.data); this.render(); },
+  render(){
+    $("#feeBps").value = this.feeBps;
+    const tb = $("#tradeTable tbody"); tb.innerHTML='';
+    let total=0, today=0;
+    const todayStr = new Date().toISOString().slice(0,10);
+    for(const t of this.data){
+      total += t.pnl;
+      if(t.time.slice(0,10)===todayStr) today += t.pnl;
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${t.time}</td><td>${t.symbol}</td><td>${t.qty.toFixed(6)}</td>
+                      <td>${t.buyPrice.toFixed(6)}</td><td>${t.sellPrice.toFixed(6)}</td>
+                      <td>${t.fee.toFixed(6)}</td><td>${t.pnl.toFixed(6)}</td>
+                      <td>${(t.pnlPct*100).toFixed(3)}%</td>`;
+      tb.appendChild(tr);
+    }
+    $("#pnlTotal").textContent = total.toFixed(6);
+    $("#pnlToday").textContent = today.toFixed(6);
+    $("#tradeCount").textContent = String(this.data.length);
+  },
+  exportCsv(){
+    const rows = [["time","symbol","qty","buyPrice","sellPrice","fee","pnl","pnlPct"]];
+    for(const t of this.data){
+      rows.push([t.time,t.symbol,t.qty,t.buyPrice,t.sellPrice,t.fee,t.pnl,t.pnlPct]);
+    }
+    const csv = rows.map(r=>r.join(",")).join("\n");
+    const blob = new Blob([csv], {type:"text/csv"});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download="trades.csv"; a.click();
+  }
+};
+TradeBook.render();
+$("#feeBps").onchange = e=>{ TradeBook.feeBps = Number(e.target.value||10); saveLS('fee_bps', TradeBook.feeBps); };
+
+/*** ====== WS (derinlik) ====== ***/
+function wsUrl(symbol){ return `wss://stream.binance.com:9443/ws/${symbol.toLowerCase()}@depth5@100ms`; }
+
+/*** ====== Bot Sınıfı ====== ***/
 class CoinBot{
   constructor(cfg){
     this.symbol = cfg.symbol;
     this.buyL = cfg.buyL ?? 2;
     this.sellL = cfg.sellL ?? 3;
-    this.qtyMode = cfg.qtyMode || 'quote'; // quote: USDT tutarı, base: adet
+    this.qtyMode = cfg.qtyMode || 'quote';
     this.qty = Number(cfg.qty || 10);
     this.ttl = Number(cfg.ttl || 20);
     this.slip = Number(cfg.slip || 0.25);
     this.chase = !!cfg.chase;
 
-    this.state='IDLE'; this.position=0; this.avgCost=0;
     this.depth={bids:[],asks:[]};
-    this.ws=null; this.timer=null; this.ex=null;
+    this.ex=null; this.ws=null; this.timer=null;
+    this.position=0; this.avgCost=0;
     this.openOrder=null; // {id, side, price, qty, t0}
 
     this.buildCard(); this.connectWS();
@@ -268,12 +339,10 @@ class CoinBot{
     `;
     $("#cards").appendChild(wrap);
 
-    // seviye seçenekleri
     const fill=(id)=>{ const s=$("#"+id); s.innerHTML=''; for(let i=1;i<=10;i++){ const o=document.createElement('option'); o.value=i; o.textContent=`L${i}`; s.appendChild(o);} };
     fill(`bl-${this.symbol}`); fill(`sl-${this.symbol}`);
     $(`#bl-${this.symbol}`).value=this.buyL; $(`#sl-${this.symbol}`).value=this.sellL;
 
-    // handlers
     $(`#q-${this.symbol}`).onchange = e=> this.qty = Number(e.target.value||0);
     $(`#m-${this.symbol}`).onchange = e=> this.qtyMode = e.target.value;
     $(`#bl-${this.symbol}`).onchange= e=> this.buyL = Number(e.target.value);
@@ -332,7 +401,7 @@ class CoinBot{
     if(!this.depth.bids.length || !this.depth.asks.length || !this.ex) return;
     const {buyPriceRaw, sellPriceRaw, bestBid, bestAsk} = this.levelPrices(); if(!buyPriceRaw || !sellPriceRaw) return;
 
-    // slipaj koruması
+    // slipaj
     const buySlip = Math.abs((buyPriceRaw - bestBid)/bestBid)*100;
     const sellSlip = Math.abs((sellPriceRaw - bestAsk)/bestAsk)*100;
     if(buySlip>this.slip || sellSlip>this.slip) return;
@@ -340,46 +409,43 @@ class CoinBot{
     const buyPrice = roundPrice(buyPriceRaw, this.ex.tickSize);
     const sellPrice= roundPrice(sellPriceRaw, this.ex.tickSize);
 
-    // miktar
     let qtyBase = this.qtyMode==='quote' ? (this.qty / buyPrice) : this.qty;
     qtyBase = floorQty(qtyBase, this.ex.stepSize);
     if(qtyBase<=0) return;
     if(qtyBase*buyPrice < this.ex.minNotional) { log(`${this.symbol}: MIN_NOTIONAL altında`); return; }
 
-    // Durum
+    // BUY yoksa → BUY yerleştir
     if(!this.openOrder && this.position<=0){
-      // BUY emri yerleştir
       try{
-        const od = await placeOrder({symbol:this.symbol, side:"BUY", type:"LIMIT", price:buyPrice, quantity:qtyBase, timeInForce:"GTC"});
+        const od = await placeOrder({symbol:this.symbol, side:"BUY", price:buyPrice, quantity:qtyBase});
         this.openOrder = {id: od.orderId, side:"BUY", price:buyPrice, qty:qtyBase, t0: now()};
         log(`${this.symbol}: BUY @ ${buyPrice} qty ${qtyBase} (#${od.orderId})`);
       }catch(e){ log(`${this.symbol}: BUY hata ${e.message}`); }
       return;
     }
 
+    // Açık emir varsa durum kontrolü
     if(this.openOrder){
       const age = (now()-this.openOrder.t0)/1000;
-      // durum sor
+
       try{
         const st = await getOrder({symbol:this.symbol, orderId:this.openOrder.id});
-        // dolum?
         const exec = Number(st.executedQty||0), orig = Number(st.origQty||this.openOrder.qty);
+
         if(this.openOrder.side==='BUY'){
           if(st.status==="FILLED" || exec>=orig){
-            // pozisyon alındı
-            this.position += exec || orig;
-            // basit maliyet
+            // Pozisyon alındı
+            const filledQty = exec || orig;
+            this.position += filledQty;
             this.avgCost = this.openOrder.price;
-            log(`${this.symbol}: BUY doldu → pozisyon ${this.position.toFixed(6)} maliyet ${this.avgCost}`);
+            log(`${this.symbol}: BUY doldu → pozisyon ${this.position.toFixed(6)} @ ${this.avgCost}`);
             this.openOrder=null;
           }else if(age>this.ttl){
-            // TTL → iptal veya chase
             await cancelOrder({symbol:this.symbol, orderId:this.openOrder.id}).catch(()=>{});
             this.openOrder=null;
             if(this.chase){
-              // yeniden L seviyesine yerleştir
               try{
-                const od = await placeOrder({symbol:this.symbol, side:"BUY", type:"LIMIT", price:buyPrice, quantity:qtyBase, timeInForce:"GTC"});
+                const od = await placeOrder({symbol:this.symbol, side:"BUY", price:buyPrice, quantity:qtyBase});
                 this.openOrder = {id: od.orderId, side:"BUY", price:buyPrice, qty:qtyBase, t0: now()};
                 log(`${this.symbol}: BUY (chase) @ ${buyPrice} (#${od.orderId})`);
               }catch(e){ log(`${this.symbol}: BUY chase hata ${e.message}`); }
@@ -387,18 +453,39 @@ class CoinBot{
           }
         }else if(this.openOrder.side==='SELL'){
           if(st.status==="FILLED" || exec>=orig){
-            this.position -= exec || orig; if(this.position<0) this.position=0;
-            const pnl = this.avgCost ? (this.openOrder.price - this.avgCost) : 0;
-            log(`${this.symbol}: SELL doldu → kalan ${this.position.toFixed(6)} | PnL ${(pnl).toFixed(6)}`);
+            const soldQty = exec || orig;
+            // PnL hesapla (ücret dahil, tahmini)
+            const f = TradeBook.feeBps * 0.0001; // bps → oran
+            const buyFee  = this.avgCost * soldQty * f;
+            const sellFee = this.openOrder.price * soldQty * f;
+            const proceeds = this.openOrder.price * soldQty - sellFee;
+            const cost     = this.avgCost * soldQty + buyFee;
+            const pnl      = proceeds - cost;
+            const pnlPct   = pnl / cost;
+
+            // trade kaydet
+            TradeBook.add({
+              time: new Date().toISOString(),
+              symbol: this.symbol,
+              qty: soldQty,
+              buyPrice: this.avgCost,
+              sellPrice: this.openOrder.price,
+              fee: buyFee + sellFee,
+              pnl, pnlPct
+            });
+
+            this.position -= soldQty; if(this.position<0) this.position=0;
+            if(this.position===0) this.avgCost=0;
+
+            log(`${this.symbol}: SELL doldu → PnL ${pnl.toFixed(6)} (${(pnlPct*100).toFixed(3)}%)`);
             this.openOrder=null;
           }else if(age>this.ttl && this.chase){
             await cancelOrder({symbol:this.symbol, orderId:this.openOrder.id}).catch(()=>{});
             this.openOrder=null;
-            // yeniden konumla
             try{
               const qty = floorQty(this.position, this.ex.stepSize);
               if(qty>0){
-                const od = await placeOrder({symbol:this.symbol, side:"SELL", type:"LIMIT", price:sellPrice, quantity:qty, timeInForce:"GTC"});
+                const od = await placeOrder({symbol:this.symbol, side:"SELL", price:sellPrice, quantity:qty});
                 this.openOrder = {id: od.orderId, side:"SELL", price:sellPrice, qty, t0: now()};
                 log(`${this.symbol}: SELL (chase) @ ${sellPrice} (#${od.orderId})`);
               }
@@ -408,25 +495,25 @@ class CoinBot{
       }catch(e){ log(`${this.symbol}: order status hata ${e.message}`); }
     }
 
-    // Satış emri yoksa ve pozisyon varsa → SELL
+    // Pozisyon var & satış emri yoksa → SELL yerleştir
     if(!this.openOrder && this.position>0){
       const qty = floorQty(this.position, this.ex.stepSize);
       if(qty>0){
         try{
-          const od = await placeOrder({symbol:this.symbol, side:"SELL", type:"LIMIT", price:sellPrice, quantity:qty, timeInForce:"GTC"});
+          const od = await placeOrder({symbol:this.symbol, side:"SELL", price:sellPrice, quantity:qty});
           this.openOrder = {id: od.orderId, side:"SELL", price:sellPrice, qty, t0: now()};
           log(`${this.symbol}: SELL @ ${sellPrice} qty ${qty} (#${od.orderId})`);
         }catch(e){ log(`${this.symbol}: SELL hata ${e.message}`); }
       }
     }
 
-    // UI özet
+    // UI
     $(`#pos-${this.symbol}`).textContent = this.position.toFixed(6);
     $(`#avg-${this.symbol}`).textContent = this.avgCost ? this.avgCost.toFixed(6) : '0';
   }
 }
 
-/* ================== Uygulama ================== */
+/*** ====== Uygulama ====== ***/
 const App = { bots:{} };
 
 $("#btnConnect").onclick = async ()=>{
@@ -434,33 +521,36 @@ $("#btnConnect").onclick = async ()=>{
   SECRET_RAW = $("#secKey").value.trim();
   PROXY = $("#proxyUrl").value.trim();
   if(!API_KEY || !SECRET_RAW || !PROXY){ alert("API Key, Secret Key ve Proxy URL gereklidir."); return; }
-  // ping proxy
   try{
     const ping = await fetch(PROXY.replace(/\/$/,'')+'/ping').then(r=>r.json());
     $("#proxyTag").textContent = ping.ok ? "Proxy: OK" : "Proxy: HATA";
   }catch{ $("#proxyTag").textContent = "Proxy: HATA"; }
   const ok = await checkAuth();
-  if(ok) $("#authTag").textContent="Auth: OK";
-  if($("#remember").checked){
+  if(ok && $("#remember").checked){
     saveLS("cfg", {api:API_KEY, sec:SECRET_RAW, proxy:PROXY});
   }
 };
-$("#btnClearKeys").onclick = ()=>{ localStorage.removeItem("cfg"); $("#apiKey").value=""; $("#secKey").value=""; };
+$("#btnClearKeys").onclick = ()=>{ localStorage.removeItem("cfg"); $("#apiKey").value=""; $("#secKey").value=""; $("#proxyUrl").value=""; $("#authTag").textContent="Auth: —"; };
 
 $("#startAll").onclick = ()=> Object.values(App.bots).forEach(b=>b.start());
 $("#stopAll").onclick  = ()=> Object.values(App.bots).forEach(b=>b.stop());
 $("#btnClearLog").onclick = ()=> (logBox.innerHTML="");
+$("#btnExportCsv").onclick = ()=> TradeBook.exportCsv();
+$("#btnClearTrades").onclick = ()=>{ if(confirm("Tüm işlem geçmişini silmek istiyor musun?")) TradeBook.clear(); };
 
-(function initSelectors(){
+// Seçiciler & kayıtlı bilgiler
+(function init(){
   for(let i=1;i<=10;i++){
     const o1=document.createElement('option'); o1.value=i; o1.textContent=`Al L${i}`; $("#buyL").appendChild(o1);
     const o2=document.createElement('option'); o2.value=i; o2.textContent=`Sat L${i}`; $("#sellL").appendChild(o2);
   }
   $("#buyL").value=2; $("#sellL").value=3;
+
   const saved = loadLS("cfg");
   if(saved){ $("#apiKey").value=saved.api||""; $("#secKey").value=saved.sec||""; $("#proxyUrl").value=saved.proxy||""; $("#remember").checked=true; }
 })();
 
+// Coin ekle
 $("#add").onclick = ()=>{
   const s = ($("#sym").value||'').trim().toUpperCase(); if(!s) return alert("Sembol girin (örn. DYM)");
   const quote = $("#quote").value;
