@@ -3,72 +3,80 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Binance Seviye Botu v2 — Tek Dosya Web Arayüzü</title>
+<title>Binance Level Bot — V3 (Şık UI + Tam Akış)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg:#0b1220; --panel:#111a2b; --panel2:#0f1626; --text:#e6edf6;
-    --muted:#9fb0ca; --good:#22c55e; --warn:#f59e0b; --bad:#ef4444; --accent:#60a5fa; --line:#19233a;
+    --bg:#0b0f1a; --panel:#0f1626; --panel2:#0c1322; --text:#eaf1ff; --muted:#9fb0ca;
+    --accent:#6ca8ff; --good:#2bd97f; --warn:#ffcf5a; --bad:#ff6161; --line:#1a2540; --chip:#0e1a33;
   }
   *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-  .wrap{max-width:1200px;margin:24px auto;padding:0 16px}
-  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-  header h1{font-size:20px;margin:0}
-  .pill{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;background:#0f1b31;color:#9fb0ca}
-  .card{background:linear-gradient(180deg,#111a2b,#0d1627);border:1px solid var(--line);border-radius:16px;box-shadow:0 0 0 1px #0b1220 inset}
+  html,body{height:100%;margin:0;background:radial-gradient(1200px 600px at 80% -10%,rgba(96,165,250,.1),transparent),radial-gradient(1000px 500px at -10% 0,rgba(43,217,127,.09),transparent),var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  .app{max-width:1260px;margin:26px auto;padding:0 16px;display:grid;gap:16px;grid-template-rows:auto auto 1fr auto}
+  header{display:flex;align-items:center;justify-content:space-between}
+  header h1{margin:0;font-size:20px;letter-spacing:.3px}
+  .brand{display:flex;gap:10px;align-items:center}
+  .brand .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#8fe3ff)}
+  .kpis{display:flex;gap:10px;flex-wrap:wrap}
+  .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;background:linear-gradient(180deg,#0f1c36,#0b1326);border:1px solid #142347;border-radius:999px;color:#cfe1ff}
+  .chip b{color:#fff}
+
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
   .panel{padding:14px 16px}
   .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .grid{display:grid;gap:12px}
-  .btn{background:var(--accent);color:#031020;border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer}
-  .btn.secondary{background:#1f2a44;color:#cfe1ff}
-  .btn.warn{background:var(--warn);color:#0d0d0d}
-  .btn.bad{background:var(--bad);color:#fff}
-  input,select{width:100%;background:#0b1425;border:1px solid #1e2a44;color:var(--text);padding:10px 12px;border-radius:12px;outline:none}
-  label{font-size:12px;color:var(--muted);margin-bottom:6px;display:block}
+  .row3{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:16px}
+  .grid{display:grid;gap:16px}
+  .btn{background:linear-gradient(180deg,var(--accent),#8ec3ff);color:#041021;border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;transition:.15s transform}
+  .btn:hover{transform:translateY(-1px)}
+  .btn.secondary{background:#1b2947;color:#cfe1ff}
+  .btn.ghost{background:transparent;border:1px solid #24365f;color:#cfe1ff}
+  .btn.bad{background:linear-gradient(180deg,#ff7b7b,#ff6161);color:#fff}
+  .btn.warn{background:linear-gradient(180deg,#ffd36a,#ffbd3a);color:#1d1200}
+  input,select{width:100%;background:#0a1324;border:1px solid #1f2b4d;color:var(--text);padding:10px 12px;border-radius:12px;outline:none}
+  label{font-size:12px;color:#9fb0ca;margin-bottom:6px;display:block}
   table{width:100%;border-collapse:collapse}
-  th,td{padding:10px;border-bottom:1px solid var(--line);font-size:14px}
-  th{color:#a9bad6;text-align:left}
-  .flex{display:flex;gap:8px;align-items:center}
+  th,td{padding:9px 10px;border-bottom:1px solid #182447;font-size:14px}
+  th{color:#a9bad6;text-align:left;font-weight:600}
   .right{justify-content:flex-end}
   .small{font-size:12px;color:#9fb0ca}
-  .kbd{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;background:#0b1425;padding:2px 6px;border-radius:6px;border:1px solid #1e2a44}
-  .status-idle{color:#9fb0ca}
-  .status-buying{color:#c3f0ff}
-  .status-wait{color:#f6c76b}
-  .status-selling{color:#bde5b8}
-  .status-done{color:#8ef072}
-  .status-error{color:#ffb4b4}
   .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  .cols-3{display:grid;grid-template-columns:1.4fr 1fr 1fr;gap:16px}
-  .scroll{max-height:260px;overflow:auto;border-radius:12px;border:1px solid var(--line);background:#0b1425}
-  .logline{padding:8px 10px;border-bottom:1px solid #0f1b31;font-size:13px}
+  .status{padding:2px 8px;border-radius:999px;border:1px solid #203058;font-size:12px;color:#cfe1ff;background:#0c1833}
+  .s-idle{background:#0c1833}
+  .s-buying{background:#0f234d}
+  .s-wait{background:#2b2408;color:#ffd36a}
+  .s-selling{background:#0f3a2a;color:#bdf8d5}
+  .s-done{background:#0e2b1f;color:#8cf0b4}
+  .s-error{background:#331212;color:#ffb5b5}
+  .scroll{max-height:280px;overflow:auto;border:1px solid #182447;border-radius:12px;background:#0a1324}
+  .logline{padding:8px 10px;border-bottom:1px solid #122041;font-size:13px}
   .logline .ts{opacity:.7;margin-right:8px}
-  .badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:12px;border:1px solid #1f2a44;background:#0d1627}
-  .inline{display:inline-flex;gap:8px;align-items:center}
-  .divider{height:1px;background:var(--line);margin:10px 0}
+  .toolbar{display:flex;gap:8px;flex-wrap:wrap}
+  .hint{background:#0b162c;border:1px dashed #22345f;padding:8px 10px;border-radius:12px}
+  .divider{height:1px;background:#1a2540;margin:10px 0}
+  .ok{color:var(--good)} .warnc{color:var(--warn)} .badc{color:var(--bad)}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="app">
   <header>
-    <h1>🛠️ Binance Seviye Botu v2</h1>
-    <div class="inline">
-      <div class="pill">Durum: <span id="globalStatus">Hazır</span></div>
-      <div class="pill">Saat ofseti: <span id="timeOffset">-</span></div>
+    <div class="brand"><div class="dot"></div><h1>Binance Level Bot — <span class="small">V3</span></h1></div>
+    <div class="kpis">
+      <div class="chip">Durum: <b id="gStatus">Hazır</b></div>
+      <div class="chip">Saat ofseti: <b id="gOffset">-</b></div>
+      <div class="chip">Açık Emir: <b id="gOpen">0</b></div>
     </div>
   </header>
 
-  <!-- Bağlantı / Proxy -->
-  <div class="card panel">
+  <!-- Bağlantı Ayarları -->
+  <section class="card panel">
     <div class="row">
       <div>
-        <label>Proxy URL (Cloudflare Worker) — <span class="small">Sonunda <span class="kbd">/</span> OLMASIN</span></label>
+        <label>Proxy URL (Cloudflare Worker) — <span class="small">sonunda <span class="mono">/</span> olmasın</span></label>
         <input id="proxyUrl" placeholder="https://<senin-worker>.workers.dev" />
       </div>
       <div>
-        <label>Binance Base URL (opsiyonel)</label>
+        <label>Binance Base URL (ops.)</label>
         <input id="baseUrl" placeholder="https://api.binance.com" />
       </div>
     </div>
@@ -78,30 +86,30 @@
         <input id="apiKey" placeholder="API Key" />
       </div>
       <div>
-        <label>Secret Key (opsiyonel — istek başına gönderilir)</label>
+        <label>Secret Key (opsiyonel)</label>
         <input id="apiSecret" type="password" placeholder="Secret Key" />
       </div>
     </div>
-    <div class="flex right" style="margin-top:12px">
-      <button class="btn secondary" id="saveConn">Bağlantıyı Kaydet</button>
-      <button class="btn" id="syncTime">Sunucu Saati Senkronize</button>
+    <div class="toolbar right" style="margin-top:12px">
+      <button class="btn secondary" id="saveConn">Kaydet</button>
+      <button class="btn" id="testConn">Bağlantıyı Test Et</button>
+      <button class="btn ghost" id="syncTime" disabled>Saati Senkronize Et</button>
     </div>
-    <div class="small" id="connNote" style="margin-top:8px"></div>
-  </div>
+    <div class="hint small" id="connNote" style="margin-top:10px">Önce Proxy URL yazıp <b>Kaydet</b> → sonra <b>Bağlantıyı Test Et</b>.</div>
+  </section>
 
-  <!-- Üç kolon: Çiftler, Aktif Emirler, Bakiyeler -->
-  <div class="cols-3" style="margin-top:16px">
-    <!-- Çift Yönetimi -->
+  <!-- Üçlü Kolon: Çiftler / Aktif Emirler / Bakiyeler -->
+  <section class="row3">
+    <!-- Çiftler -->
     <div class="card panel">
-      <div class="flex" style="justify-content:space-between; margin-bottom:6px">
-        <div class="small"><strong>Akış:</strong> Alım = <span class="kbd">BID N</span>, Dolunca Satış = <span class="kbd">ASK M</span>. Miktar: Mod seçimine göre (USDT/BASE). Kural uyumları otomatik.</div>
-        <div class="inline">
-          <button class="btn" id="addRow">+ Çift</button>
+      <div class="toolbar" style="justify-content:space-between; margin-bottom:6px">
+        <div class="small"><b>Akış:</b> Alım = <span class="mono">BID N</span>, Dolunca Satış = <span class="mono">ASK M</span>. Miktar kurallara göre otomatik yuvarlanır.</div>
+        <div class="toolbar">
+          <button class="btn" id="addRow">+ Çift Ekle</button>
           <button class="btn warn" id="startAll">Başlat</button>
           <button class="btn bad" id="stopAll">Durdur</button>
         </div>
       </div>
-
       <table>
         <thead>
           <tr>
@@ -120,443 +128,199 @@
 
     <!-- Aktif Emirler -->
     <div class="card panel">
-      <div class="flex" style="justify-content:space-between; margin-bottom:6px">
-        <div class="inline"><strong>Aktif Emirler</strong> <span class="badge" id="activeCount">0</span></div>
-        <button class="btn secondary" id="refreshOrders">Yenile</button>
+      <div class="toolbar" style="justify-content:space-between; margin-bottom:6px">
+        <div><b>Aktif Emirler</b></div>
+        <div class="toolbar">
+          <button class="btn secondary" id="refreshOpen">Yenile</button>
+        </div>
       </div>
-      <div class="scroll" id="activeOrders"></div>
-      <div class="small" style="margin-top:8px">Bu panel botun açtığı ve hâlâ açık olan emirleri listeler. (Hesaptaki diğer açık emirler için proxy'de <span class="kbd">/trade/openOrders</span> ucu gerekir.)</div>
+      <div class="scroll" id="openOrdersBox"></div>
     </div>
 
     <!-- Bakiyeler -->
     <div class="card panel">
-      <div class="flex" style="justify-content:space-between; margin-bottom:6px">
-        <div class="inline"><strong>Bakiyeler</strong></div>
-        <button class="btn secondary" id="refreshBalances">Yenile</button>
+      <div class="toolbar" style="justify-content:space-between; margin-bottom:6px">
+        <div><b>Bakiyeler</b></div>
+        <div class="toolbar">
+          <button class="btn secondary" id="refreshBalances">Yenile</button>
+        </div>
       </div>
-      <div id="balances">
-        <div class="small">USDT ve izlenen coin bakiyeleri burada görünür. Proxy'de <span class="kbd">/api/account</span> ucu varsa gerçek borsa bakiyesi; yoksa bot-takipli bakiye gösterilir.</div>
-      </div>
+      <div id="balancesBox" class="small">Hesap bakiyeleri için Worker'da <span class="mono">/api/account</span> ucu tanımlı olmalı (koydum). Secret'ları eklediğinden emin ol.</div>
     </div>
-  </div>
+  </section>
 
   <!-- Son İşlemler & Loglar -->
-  <div class="grid" style="grid-template-columns:1fr 1fr; margin-top:16px">
+  <section class="grid" style="grid-template-columns:1fr 1fr">
     <div class="card panel">
-      <div class="flex" style="justify-content:space-between; margin-bottom:6px">
-        <div class="inline"><strong>Son İşlemler</strong> <span class="badge" id="histCount">0</span></div>
+      <div class="toolbar" style="justify-content:space-between; margin-bottom:6px">
+        <div><b>Son İşlemler</b> <span class="small">(BUY/SELL fill)</span></div>
         <button class="btn secondary" id="clearHistory">Temizle</button>
       </div>
-      <div class="scroll" id="history"></div>
+      <div class="scroll" id="historyBox"></div>
     </div>
     <div class="card panel">
-      <div class="flex" style="justify-content:space-between; margin-bottom:6px">
-        <div class="inline"><strong>Canlı Log</strong></div>
+      <div class="toolbar" style="justify-content:space-between; margin-bottom:6px">
+        <div><b>Canlı Log</b></div>
         <button class="btn secondary" id="clearLog">Temizle</button>
       </div>
-      <div class="scroll" id="logs"></div>
+      <div class="scroll" id="logBox"></div>
     </div>
-  </div>
+  </section>
 
-  <div class="small" style="margin-top:12px">
-    <strong>Notlar:</strong> Gerçek emir atar. Küçük tutarlarla test et. Proxy URL sonunda <span class="kbd">/</span> olmasın. Worker'da saat ve imza server-side yapıldığı için senkron sadece bilgilendirme amaçlıdır.
-  </div>
+  <footer class="small">
+    <div class="divider"></div>
+    <div>İpucu: Proxy URL sonunda <span class="mono">/</span> olmasın. Önce küçük tutarlarla test et. Hata durumunda üstteki <b>Bağlantıyı Test Et</b> butonu hızlı teşhis yapar.</div>
+  </footer>
 </div>
 
 <script>
-// ================== Yardımcılar & Depo ==================
+// ======================== Durum / Depo ========================
 const el = id => document.getElementById(id);
 const fmt = n => new Intl.NumberFormat('tr-TR',{maximumFractionDigits:8}).format(Number(n||0));
-const nowTs = () => new Date().toLocaleTimeString('tr-TR', { hour12:false });
-
-const S = JSON.parse(localStorage.getItem('botStateV2')||'{}');
+const S = JSON.parse(localStorage.getItem('botV3')||'{}');
 S.conn = S.conn || { proxyUrl:'', baseUrl:'', apiKey:'', apiSecret:'', timeOffsetMs:0 };
 S.rows = S.rows || [ rowDefault('DYMUSDT') ];
-S.orders = S.orders || [];         // botun açtığı emirler {id,symbol,side,qty,price,status}
-S.history = S.history || [];       // son işlemler
-S.balances = S.balances || {};     // bot-takipli bakiyeler (gerçek hesap verisi yoksa)
+S.orders = S.orders || [];      // botun açtığı emirler {orderId,symbol,side,qty,price,status}
+S.history = S.history || [];    // {t,type,msg,extra}
 S.logs = S.logs || [];
+S.cache = S.cache || {};        // küçük bellek
 
 function rowDefault(symbol){
   return { symbol:symbol||'BTCUSDT', mode:'QUOTE', amount:10, buyLevel:2, sellLevel:3, running:false, status:'idle', info:null, activeOrderId:null, buyFilledQty:null };
 }
-function save(){ localStorage.setItem('botStateV2', JSON.stringify(S)); }
+function save(){ localStorage.setItem('botV3', JSON.stringify(S)); }
+function log(type,msg,data){ S.logs.push({t:Date.now(),type,msg,data:data||null}); if(S.logs.length>400) S.logs.shift(); save(); renderLog(); }
+function hist(type,msg,extra){ S.history.unshift({t:Date.now(),type,msg,extra:extra||null}); if(S.history.length>200) S.history.pop(); save(); renderHistory(); }
 
-function join(base, path){
-  const b = (base||'').replace(/\/+$/,'');
-  const p = (path||'').replace(/^\/+/, '');
-  return b + '/' + p;
-}
+// ======================== URL & Fetch Helpers ========================
+function isValidUrl(u){ try{ const ok = /^https?:\/\//i.test(u); return !!ok; }catch(_){ return false; } }
+function join(base, path){ const b=(base||'').replace(/\/+$/,''); const p=(path||'').replace(/^\/+/, ''); return b + '/' + p; }
+function buildUrl(path, q){ let u = join(S.conn.proxyUrl, path); const params = new URLSearchParams(q||{}); if (S.conn.baseUrl) params.set('baseUrl', S.conn.baseUrl); const qs=params.toString(); if(qs) u += (u.includes('?')?'&':'?')+qs; return u; }
+async function httpGet(path, q){ const url = buildUrl(path, q); const headers = {}; if(S.conn.apiKey) headers['X-API-KEY']=S.conn.apiKey; if(S.conn.apiSecret) headers['X-API-SECRET']=S.conn.apiSecret; const r = await fetch(url,{headers}); let js={}; try{ js=await r.json(); }catch{} if(!r.ok) throw new Error(js.message||js.msg||(`${r.status} ${r.statusText}`)); return js; }
+async function httpPost(path, body){ const url = buildUrl(path); const headers={'Content-Type':'application/json'}; if(S.conn.apiKey) headers['X-API-KEY']=S.conn.apiKey; if(S.conn.apiSecret) headers['X-API-SECRET']=S.conn.apiSecret; const r = await fetch(url,{method:'POST',headers,body:JSON.stringify(body||{})}); let js={}; try{ js=await r.json(); }catch{} if(!r.ok) throw new Error(js.message||js.msg||(`${r.status} ${r.statusText}`)); return js; }
 
-function log(type, message, data){
-  const line = { t: Date.now(), type, message, data: data||null };
-  S.logs.push(line);
-  if (S.logs.length>500) S.logs.shift();
-  save();
-  renderLogs();
-}
+// ======================== Bağlantı UI ========================
+function renderConn(){ el('proxyUrl').value=S.conn.proxyUrl||''; el('baseUrl').value=S.conn.baseUrl||''; el('apiKey').value=S.conn.apiKey||''; el('apiSecret').value=S.conn.apiSecret||''; el('gOffset').textContent=(S.conn.timeOffsetMs||0)+' ms'; }
+function setStatus(s){ el('gStatus').textContent=s; }
+function setOpenCount(){ const open=S.orders.filter(o=>!['FILLED','CANCELED','REJECTED','EXPIRED'].includes(o.status||'')); el('gOpen').textContent=open.length; }
 
-function histPush(entry){
-  S.history.unshift({ t: Date.now(), ...entry });
-  if (S.history.length>200) S.history.pop();
-  save();
-  renderHistory();
-}
+el('saveConn').onclick = ()=>{ S.conn.proxyUrl=el('proxyUrl').value.trim(); S.conn.baseUrl=el('baseUrl').value.trim(); S.conn.apiKey=el('apiKey').value.trim(); S.conn.apiSecret=el('apiSecret').value.trim(); save(); renderConn(); el('connNote').textContent='Kaydedildi. Şimdi Bağlantıyı Test Et'; log('info','Connection saved',{proxy:S.conn.proxyUrl}); };
 
-function setGlobalStatus(s){ el('globalStatus').textContent = s; }
-
-// ================== Proxy Çağrıları ==================
-async function proxyGET(path){
-  const u = new URL(join(S.conn.proxyUrl, path));
-  if (S.conn.baseUrl) u.searchParams.set('baseUrl', S.conn.baseUrl);
-  const headers = {};
-  if (S.conn.apiKey) headers['X-API-KEY'] = S.conn.apiKey;
-  if (S.conn.apiSecret) headers['X-API-SECRET'] = S.conn.apiSecret;
-
-  const r = await fetch(u, { headers });
-  let js = {};
-  try{ js = await r.json(); }catch(e){ /* ignore */ }
-  if (!r.ok) throw new Error((js && (js.message||js.msg)) || (r.status+':'+r.statusText) );
-  return js;
-}
-async function proxyPOST(path, body){
-  const u = new URL(join(S.conn.proxyUrl, path));
-  if (S.conn.baseUrl) u.searchParams.set('baseUrl', S.conn.baseUrl);
-  const headers = { 'Content-Type':'application/json' };
-  if (S.conn.apiKey) headers['X-API-KEY'] = S.conn.apiKey;
-  if (S.conn.apiSecret) headers['X-API-SECRET'] = S.conn.apiSecret;
-
-  const r = await fetch(u, { method:'POST', headers, body: JSON.stringify(body||{}) });
-  let js = {};
-  try{ js = await r.json(); }catch(e){ /* ignore */ }
-  if (!r.ok) throw new Error((js && (js.message||js.msg)) || (r.status+':'+r.statusText) );
-  return js;
-}
-
-async function syncServerTime(){
+el('testConn').onclick = async ()=>{
   try{
-    const t0 = Date.now();
-    const data = await proxyGET('/api/time');
-    const t1 = Date.now();
-    const approxNow = (t0+t1)/2;
-    const offset = (data && data.serverTime) ? (data.serverTime - approxNow) : 0;
-    S.conn.timeOffsetMs = Math.round(offset);
-    save();
-    el('timeOffset').textContent = S.conn.timeOffsetMs + ' ms';
-    el('connNote').textContent = 'Sunucu saat ofseti hesaplandı.';
-    log('info','Time sync OK', { offset: S.conn.timeOffsetMs });
-  }catch(e){
-    S.conn.timeOffsetMs = 0; save();
-    el('timeOffset').textContent = '0 ms';
-    el('connNote').textContent = 'Saat senkron başarısız: '+ e.message + ' (devam edebilirsin)';
-    log('warn','Time sync failed', { error: e.message });
-  }
-}
-
-// ================== Filtreler ve Yuvarlama ==================
-function decimalsFromStep(stepStr){
-  const s = stepStr.indexOf('.')>=0 ? stepStr.split('.')[1] : '';
-  return (s.replace(/0+$/,'').length) || (s.length);
-}
-function floorToStep(v, stepStr){
-  const step = parseFloat(stepStr);
-  const d = decimalsFromStep(stepStr);
-  const m = Math.pow(10,d);
-  return Math.floor((v + 1e-12) / step) * step;
-}
-function roundPriceToTick(p, tickStr){
-  const d = decimalsFromStep(tickStr);
-  const m = Math.pow(10,d);
-  return Math.floor(p * m + 1e-9) / m;
-}
-
-// ================== UI: Bağlantı ==================
-function renderConn(){
-  el('proxyUrl').value = S.conn.proxyUrl||'';
-  el('baseUrl').value = S.conn.baseUrl||'';
-  el('apiKey').value = S.conn.apiKey||'';
-  el('apiSecret').value = S.conn.apiSecret||'';
-  el('timeOffset').textContent = (S.conn.timeOffsetMs||0)+' ms';
-}
-
-el('saveConn').onclick = ()=>{
-  S.conn.proxyUrl = el('proxyUrl').value.trim();
-  S.conn.baseUrl = el('baseUrl').value.trim();
-  S.conn.apiKey = el('apiKey').value.trim();
-  S.conn.apiSecret = el('apiSecret').value.trim();
-  save();
-  el('connNote').textContent = 'Bağlantı kaydedildi.';
-  log('info','Connection saved', { proxy:S.conn.proxyUrl });
+    if(!isValidUrl(S.conn.proxyUrl)) throw new Error('Proxy URL geçersiz. https:// ile başlamalı ve sonunda / olmamalı.');
+    el('connNote').textContent='Test ediliyor...';
+    // 1) /api/time
+    const t = await httpGet('/api/time');
+    if(!t || !t.serverTime) throw new Error('/api/time başarısız');
+    // 2) /api/exchangeInfo
+    const ex = await httpGet('/api/exchangeInfo', {symbol:'BTCUSDT'});
+    if(!ex || !ex.symbols || !ex.symbols.length) throw new Error('/api/exchangeInfo başarısız');
+    el('connNote').innerHTML = `<span class='ok'>Bağlantı OK</span> — <span class='mono'>/api/time</span> ve <span class='mono'>/api/exchangeInfo</span> çalışıyor.`;
+    el('syncTime').disabled=false;
+    log('info','Connection test OK');
+  }catch(e){ el('connNote').innerHTML = `<span class='badc'>Hata:</span> ${e.message}`; el('syncTime').disabled=true; log('warn','Connection test failed',{error:e.message}); }
 };
 
-el('syncTime').onclick = ()=> syncServerTime();
+el('syncTime').onclick = async ()=>{
+  try{ const t0=Date.now(); const data = await httpGet('/api/time'); const t1=Date.now(); const approx=(t0+t1)/2; S.conn.timeOffsetMs=Math.round((data.serverTime||approx)-approx); save(); renderConn(); log('info','Time synced',{offset:S.conn.timeOffsetMs}); }
+  catch(e){ S.conn.timeOffsetMs=0; save(); renderConn(); log('warn','Time sync failed',{error:e.message}); }
+};
 
-// ================== Çift Listesi ==================
-function addRowUI(row, idx){
-  const tr = document.createElement('tr');
-
-  const sym = document.createElement('td');
-  const symIn = document.createElement('input'); symIn.value=row.symbol;
-  symIn.onchange=()=>{ row.symbol = symIn.value.trim().toUpperCase(); save(); };
-  sym.appendChild(symIn);
-
-  const amt = document.createElement('td');
-  const amtIn = document.createElement('input'); amtIn.type='number'; amtIn.step='any'; amtIn.value=row.amount;
-  amtIn.onchange=()=>{ row.amount=parseFloat(amtIn.value)||0; save(); };
-  amt.appendChild(amtIn);
-
-  const mode = document.createElement('td');
-  const sel = document.createElement('select');
-  sel.innerHTML='<option value="QUOTE">QUOTE(USDT)</option><option value="BASE">BASE(Miktar)</option>';
-  sel.value = row.mode; sel.onchange=()=>{ row.mode=sel.value; save(); };
-  mode.appendChild(sel);
-
-  const buy = document.createElement('td');
-  const buyIn = document.createElement('input'); buyIn.type='number'; buyIn.min='1'; buyIn.value=row.buyLevel;
-  buyIn.onchange=()=>{ row.buyLevel=parseInt(buyIn.value)||1; save(); };
-  buy.appendChild(buyIn);
-
-  const sell = document.createElement('td');
-  const sellIn = document.createElement('input'); sellIn.type='number'; sellIn.min='1'; sellIn.value=row.sellLevel;
-  sellIn.onchange=()=>{ row.sellLevel=parseInt(sellIn.value)||1; save(); };
-  sell.appendChild(sellIn);
-
-  const stat = document.createElement('td');
-  const statSpan=document.createElement('span'); statSpan.className='status-'+row.status; statSpan.textContent=row.status; stat.appendChild(statSpan);
-
-  const act = document.createElement('td');
-  const startBtn = document.createElement('button'); startBtn.className='btn'; startBtn.textContent='Başlat'; startBtn.onclick=()=>startRow(idx, statSpan);
-  const stopBtn  = document.createElement('button'); stopBtn.className='btn secondary'; stopBtn.style.marginLeft='6px'; stopBtn.textContent='Durdur'; stopBtn.onclick=()=>stopRow(idx, statSpan);
-  const delBtn   = document.createElement('button'); delBtn.className='btn bad'; delBtn.style.marginLeft='6px'; delBtn.textContent='Sil'; delBtn.onclick=()=>{ S.rows.splice(idx,1); save(); renderRows(); };
-  act.append(startBtn, stopBtn, delBtn);
-
-  tr.append(sym,amt,mode,buy,sell,stat,act);
-  el('pairsBody').appendChild(tr);
+// ======================== Çiftler Tablosu ========================
+function renderRows(){ const body=el('pairsBody'); body.innerHTML=''; S.rows.forEach((row,idx)=> addRowUI(row,idx)); }
+function addRowUI(row,idx){
+  const tr=document.createElement('tr');
+  // Sembol
+  const tdS=document.createElement('td'); const iS=document.createElement('input'); iS.value=row.symbol; iS.onchange=()=>{row.symbol=iS.value.trim().toUpperCase(); save();}; tdS.appendChild(iS);
+  // Tutar/Miktar
+  const tdA=document.createElement('td'); const iA=document.createElement('input'); iA.type='number'; iA.step='any'; iA.value=row.amount; iA.onchange=()=>{row.amount=parseFloat(iA.value)||0; save();}; tdA.appendChild(iA);
+  // Mod
+  const tdM=document.createElement('td'); const sel=document.createElement('select'); sel.innerHTML='<option value="QUOTE">QUOTE(USDT)</option><option value="BASE">BASE(Miktar)</option>'; sel.value=row.mode; sel.onchange=()=>{row.mode=sel.value; save();}; tdM.appendChild(sel);
+  // BID N
+  const tdB=document.createElement('td'); const iB=document.createElement('input'); iB.type='number'; iB.min='1'; iB.value=row.buyLevel; iB.onchange=()=>{row.buyLevel=parseInt(iB.value)||1; save();}; tdB.appendChild(iB);
+  // ASK M
+  const tdSM=document.createElement('td'); const iSM=document.createElement('input'); iSM.type='number'; iSM.min='1'; iSM.value=row.sellLevel; iSM.onchange=()=>{row.sellLevel=parseInt(iSM.value)||1; save();}; tdSM.appendChild(iSM);
+  // Durum
+  const tdSt=document.createElement('td'); const chip=document.createElement('span'); chip.className='status s-'+row.status; chip.textContent=row.status; tdSt.appendChild(chip);
+  // Aksiyonlar
+  const tdAct=document.createElement('td');
+  const bStart=document.createElement('button'); bStart.className='btn'; bStart.textContent='Başlat'; bStart.onclick=()=>startRow(idx,chip);
+  const bStop=document.createElement('button'); bStop.className='btn secondary'; bStop.style.marginLeft='6px'; bStop.textContent='Durdur'; bStop.onclick=()=>stopRow(idx,chip);
+  const bDel=document.createElement('button'); bDel.className='btn bad'; bDel.style.marginLeft='6px'; bDel.textContent='Sil'; bDel.onclick=()=>{ S.rows.splice(idx,1); save(); renderRows(); };
+  tdAct.append(bStart,bStop,bDel);
+  tr.append(tdS,tdA,tdM,tdB,tdSM,tdSt,tdAct); el('pairsBody').appendChild(tr);
 }
-
-function renderRows(){ el('pairsBody').innerHTML=''; S.rows.forEach((row,idx)=> addRowUI(row,idx)); }
 
 el('addRow').onclick=()=>{ S.rows.push(rowDefault('BTCUSDT')); save(); renderRows(); };
 el('startAll').onclick=()=> S.rows.forEach((_,i)=> startRow(i));
 el('stopAll').onclick =()=> S.rows.forEach((_,i)=> stopRow(i));
 
-// ================== Aktif Emirler & İşlemler & Loglar ==================
-function renderActiveOrders(){
-  const box = el('activeOrders'); box.innerHTML='';
-  const open = S.orders.filter(o=> !['FILLED','CANCELED','REJECTED','EXPIRED'].includes(o.status||''));
-  el('activeCount').textContent = open.length;
-  if (!S.orders.length){ box.innerHTML='<div class="small" style="padding:10px">Henüz emir yok</div>'; return; }
-  for(const o of S.orders){
-    const div=document.createElement('div'); div.className='logline';
-    div.innerHTML = `<span class="ts">${new Date(o.createdAt||Date.now()).toLocaleTimeString('tr-TR',{hour12:false})}</span>
-      <span class="badge">${o.symbol}</span>
-      <span class="badge">${o.side}</span>
-      <span class="mono">${fmt(o.qty)} @ ${fmt(o.price)}</span>
-      <span class="badge">${o.status||'NEW'}</span>
-      ${o.orderId?`<span class="small">#${o.orderId}</span>`:''}`;
-    box.appendChild(div);
-  }
+// ======================== Emir Akışı ========================
+function decFromStep(step){ const s=(step+"").split('.')[1]||''; return s.length; }
+function floorToStep(v, step){ step=parseFloat(step); return Math.floor((v+1e-12)/step)*step; }
+function roundTick(p, tick){ const d=decFromStep(tick); const m=Math.pow(10,d); return Math.floor(p*m+1e-9)/m; }
+
+async function ensureInfo(row){ if(row.info) return; const ex=await httpGet('/api/exchangeInfo',{symbol:row.symbol}); const sym=ex.symbols && ex.symbols[0]; if(!sym) throw new Error('exchangeInfo yok: '+row.symbol); const pf=sym.filters.find(f=>f.filterType==='PRICE_FILTER'); const lf=sym.filters.find(f=>f.filterType==='LOT_SIZE') || sym.filters.find(f=>f.filterType==='MARKET_LOT_SIZE'); const mn=sym.filters.find(f=>f.filterType==='MIN_NOTIONAL'); row.info={ tickSize: pf?pf.tickSize:'0.0001', stepSize: lf?lf.stepSize:'0.0001', minQty: lf?parseFloat(lf.minQty):0, minNotional: mn?parseFloat(mn.minNotional):0 }; save(); }
+
+const loops=new Map();
+function setChip(chip,row,s){ row.status=s; chip.className='status s-'+s; chip.textContent=s; save(); }
+async function cycle(idx, chip){ const row=S.rows[idx]; try{
+  await ensureInfo(row);
+  const lim=Math.max(row.buyLevel,row.sellLevel);
+  const depth=await httpGet('/api/depth',{symbol:row.symbol,limit:lim});
+  const bids=depth.bids||[], asks=depth.asks||[]; if(bids.length<row.buyLevel||asks.length<row.sellLevel) throw new Error('Derinlik yetersiz');
+  const buyPx=parseFloat(bids[row.buyLevel-1][0]); const sellSnap=parseFloat(asks[row.sellLevel-1][0]);
+  let qty=(row.mode==='QUOTE')?(row.amount/buyPx):row.amount; qty=Math.max(qty,row.info.minQty||0); qty=floorToStep(qty,row.info.stepSize); const px=roundTick(buyPx,row.info.tickSize);
+  if(px*qty < (row.info.minNotional||0)) qty=floorToStep((row.info.minNotional+1e-9)/px,row.info.stepSize);
+  if(!qty||qty<=0) throw new Error('Miktar 0 — min kuralları');
+
+  setChip(chip,row,'buying');
+  const buy=await httpPost('/trade/order',{symbol:row.symbol,side:'BUY',type:'LIMIT',timeInForce:'GTC',quantity:String(qty),price:String(px),clientOrderId:'L'+Date.now()});
+  const buyOrder={createdAt:Date.now(),orderId:buy.orderId,symbol:row.symbol,side:'BUY',qty,price:px,status:buy.status||'NEW'}; S.orders.push(buyOrder); save(); setOpenCount(); renderOpenOrders(); log('info','BUY placed',buyOrder);
+
+  setChip(chip,row,'wait');
+  let filled=0; for(let i=0;i<200;i++){ await new Promise(r=>setTimeout(r,900)); const st=await httpGet('/trade/order/status',{symbol:row.symbol,orderId:buy.orderId}); buyOrder.status=st.status; save(); setOpenCount(); renderOpenOrders(); if(st.status==='FILLED'){ filled=parseFloat(st.executedQty); break; } if(['CANCELED','REJECTED','EXPIRED'].includes(st.status)) throw new Error('BUY başarısız: '+st.status); }
+  if(!filled) throw new Error('Zaman aşımı: BUY dolmadı');
+  row.buyFilledQty=floorToStep(filled,row.info.stepSize); hist('BUY FILLED',`${row.symbol} ${fmt(row.buyFilledQty)} @ ${fmt(px)}`);
+
+  setChip(chip,row,'selling'); const sellPx=roundTick(sellSnap,row.info.tickSize);
+  const sell=await httpPost('/trade/order',{symbol:row.symbol,side:'SELL',type:'LIMIT',timeInForce:'GTC',quantity:String(row.buyFilledQty),price:String(sellPx),clientOrderId:'S'+Date.now()});
+  const sellOrder={createdAt:Date.now(),orderId:sell.orderId,symbol:row.symbol,side:'SELL',qty:row.buyFilledQty,price:sellPx,status:sell.status||'NEW'}; S.orders.push(sellOrder); save(); setOpenCount(); renderOpenOrders(); log('info','SELL placed',sellOrder);
+
+  setChip(chip,row,'done'); renderHistory();
+} catch(e){ setChip(chip,row,'error'); log('error','cycle failed: '+e.message); } finally { save(); } }
+
+function startRow(idx, chip){ const row=S.rows[idx]; if(row.running) return; row.running=true; save(); setStatus('Çalışıyor'); const loop=async()=>{ if(!row.running) return; setChip(chip,row,'idle'); await cycle(idx,chip); if(!row.running) return; setTimeout(loop,1200); }; loops.set(idx,true); loop(); }
+function stopRow(idx, chip){ const row=S.rows[idx]; row.running=false; setChip(chip,row,'idle'); save(); loops.delete(idx); if(loops.size===0) setStatus('Hazır'); }
+
+// Açık emirleri periyodik güncelle (ve SELL fill tespiti)
+setInterval(async()=>{ try{ const opened = await httpGet('/trade/openOrders'); const box=el('openOrdersBox'); if(Array.isArray(opened)){ S.orders = mergeOrders(S.orders, opened); save(); setOpenCount(); renderOpenOrders(); } }catch(_){ /* proxy desteklemeyebilir */ } }, 4000);
+
+function mergeOrders(local, remote){ // remote (resmi) veriyi local kayıtlara yedir
+  const map=new Map(local.map(o=>[String(o.orderId)+'_'+o.symbol,o]));
+  for(const r of remote){ const key=String(r.orderId)+'_'+r.symbol; const cur=map.get(key)||{}; map.set(key,{ ...cur, ...r }); }
+  return [...map.values()].sort((a,b)=> (a.updateTime||a.time||0)-(b.updateTime||b.time||0));
 }
 
-function renderHistory(){
-  const box = el('history'); box.innerHTML='';
-  el('histCount').textContent = S.history.length;
-  for(const h of S.history){
-    const div=document.createElement('div'); div.className='logline';
-    div.innerHTML = `<span class="ts">${new Date(h.t).toLocaleTimeString('tr-TR',{hour12:false})}</span>
-      <strong>${h.type}</strong> — ${h.msg}
-      ${h.extra?`<div class='small mono'>${JSON.stringify(h.extra)}</div>`:''}`;
-    box.appendChild(div);
-  }
-}
+// ======================== Paneller ========================
+function renderOpenOrders(){ const box=el('openOrdersBox'); box.innerHTML=''; if(!S.orders.length){ box.innerHTML='<div class="small" style="padding:10px">Açık emir yok</div>'; return; } for(const o of S.orders){ const div=document.createElement('div'); div.className='logline'; div.innerHTML=`<span class='ts'>${new Date(o.time||o.transactTime||o.createdAt||Date.now()).toLocaleTimeString('tr-TR',{hour12:false})}</span> <span class='mono'>${o.symbol}</span> <span class='chip'>${o.side||'-'}</span> <span class='mono'>${fmt(o.origQty||o.qty||o.executedQty||0)} @ ${fmt(o.price||0)}</span> <span class='status'>${o.status||'NEW'}</span> ${o.orderId?`<span class='small'>#${o.orderId}</span>`:''}`; box.appendChild(div); } }
 
-function renderLogs(){
-  const box = el('logs'); box.innerHTML='';
-  for(const ln of S.logs.slice(-200)){
-    const div=document.createElement('div'); div.className='logline';
-    div.innerHTML = `<span class="ts">${new Date(ln.t).toLocaleTimeString('tr-TR',{hour12:false})}</span>
-      <span class="badge">${ln.type}</span> ${ln.message}
-      ${ln.data?`<div class='small mono'>${JSON.stringify(ln.data)}</div>`:''}`;
-    box.appendChild(div);
-  }
-  box.scrollTop = box.scrollHeight;
-}
+async function refreshBalances(){ const box=el('balancesBox'); try{ const acc=await httpGet('/api/account'); const rows=(acc.balances||[]).filter(b=>parseFloat(b.free)>0 || parseFloat(b.locked)>0); if(!rows.length){ box.innerHTML='<div class="small">Hesapta bakiye görünmüyor.</div>'; return; } box.innerHTML = rows.map(b=> `${b.asset}: <span class='mono'>${fmt(b.free)}</span> (free) — <span class='mono'>${fmt(b.locked)}</span> (locked)`).join('<br>'); log('info','Balances updated',{count:rows.length}); }catch(e){ box.innerHTML=`<span class='warnc'>Proxy /api/account desteklemiyor veya Secret eksik.</span>`; log('warn','Balances failed',{error:e.message}); } }
 
-el('clearLog').onclick=()=>{ S.logs=[]; save(); renderLogs(); };
-el('clearHistory').onclick=()=>{ S.history=[]; save(); renderHistory(); };
+function renderHistory(){ const box=el('historyBox'); box.innerHTML=''; for(const h of S.history){ const div=document.createElement('div'); div.className='logline'; div.innerHTML=`<span class='ts'>${new Date(h.t).toLocaleTimeString('tr-TR',{hour12:false})}</span> <b>${h.type}</b> — ${h.msg} ${h.extra?`<div class='small mono'>${JSON.stringify(h.extra)}</div>`:''}`; box.appendChild(div); } }
 
-// ================== Bakiyeler ==================
-async function refreshBalances(){
-  const box = el('balances');
-  try{
-    // Gerçek borsa bakiyesi (proxy /api/account varsa)
-    const acc = await proxyGET('/api/account');
-    const nonZero = (acc.balances||[]).filter(b=> parseFloat(b.free)>0 || parseFloat(b.locked)>0);
-    const lines = nonZero
-      .filter(b=> b.asset==='USDT' || S.rows.some(r=> r.symbol.startsWith(b.asset)))
-      .map(b=> `${b.asset}: <span class='mono'>${fmt(b.free)} free</span>, <span class='mono'>${fmt(b.locked)} locked</span>`);
-    box.innerHTML = lines.length? ('<div>'+lines.join('<br>')+'</div>') : '<div class="small">Hesapta ilgili varlık görünmüyor.</div>';
-    log('info','Balances updated', { count: nonZero.length });
-  }catch(e){
-    // Proxy desteklemiyorsa bot-takipli bakiye
-    const keys = Object.keys(S.balances);
-    if (!keys.length){ box.innerHTML = '<div class="small">Proxy \u201c/account\u201d ucu yok. Bot-takipli: henüz işlem yok.</div>'; return; }
-    const lines = keys.map(k=> `${k}: <span class='mono'>${fmt(S.balances[k])}</span>`);
-    box.innerHTML = '<div class="small">Proxy yok → bot-takipli bakiyeler</div><div style="margin-top:6px">'+lines.join('<br>')+'</div>';
-  }
-}
+function renderLog(){ const box=el('logBox'); box.innerHTML=''; for(const ln of S.logs.slice(-250)){ const div=document.createElement('div'); div.className='logline'; div.innerHTML=`<span class='ts'>${new Date(ln.t).toLocaleTimeString('tr-TR',{hour12:false})}</span> <span class='status'>${ln.type}</span> ${ln.msg} ${ln.data?`<div class='small mono'>${JSON.stringify(ln.data)}</div>`:''}`; box.appendChild(div); } box.scrollTop=box.scrollHeight; }
 
-el('refreshBalances').onclick = ()=> refreshBalances();
-el('refreshOrders').onclick   = ()=> renderActiveOrders();
-
-// ================== İş Akışı ==================
-const loops = new Map();
-
-function setStatus(row, s, statSpan){ row.status=s; save(); if(statSpan){ statSpan.className='status-'+s; statSpan.textContent=s; } }
-
-async function ensureExchangeInfo(row){
-  if (row.info) return;
-  const js = await proxyGET('/api/exchangeInfo?symbol='+encodeURIComponent(row.symbol));
-  const sym = js.symbols && js.symbols[0];
-  if (!sym) throw new Error('exchangeInfo yok: '+row.symbol);
-  const pf = sym.filters.find(f=>f.filterType==='PRICE_FILTER');
-  const lf = sym.filters.find(f=>f.filterType==='LOT_SIZE') || sym.filters.find(f=>f.filterType==='MARKET_LOT_SIZE');
-  const mn = sym.filters.find(f=>f.filterType==='MIN_NOTIONAL');
-  row.info = {
-    tickSize: pf ? pf.tickSize : '0.0001',
-    stepSize: lf ? lf.stepSize : '0.0001',
-    minQty:   lf ? parseFloat(lf.minQty) : 0,
-    minNotional: mn ? parseFloat(mn.minNotional) : 0
-  };
-  save();
-}
-
-async function oneCycle(idx, statSpan){
-  const row = S.rows[idx];
-  try{
-    await ensureExchangeInfo(row);
-
-    // 1) orderbook
-    const lim = Math.max(row.buyLevel, row.sellLevel);
-    const depth = await proxyGET('/api/depth?symbol='+encodeURIComponent(row.symbol)+'&limit='+lim);
-    const bids = depth.bids||[]; const asks = depth.asks||[];
-    if (bids.length < row.buyLevel || asks.length < row.sellLevel) throw new Error('Derinlik yetersiz');
-
-    const buyPrice = parseFloat(bids[row.buyLevel-1][0]);
-    const sellSnap = parseFloat(asks[row.sellLevel-1][0]);
-
-    // 2) miktar hesap
-    let qty = (row.mode==='QUOTE') ? (row.amount / buyPrice) : row.amount;
-    qty = Math.max(qty, row.info.minQty||0);
-    qty = floorToStep(qty, row.info.stepSize);
-    const priceRounded = roundPriceToTick(buyPrice, row.info.tickSize);
-    if (priceRounded * qty < (row.info.minNotional||0)) {
-      qty = floorToStep((row.info.minNotional + 1e-9)/priceRounded, row.info.stepSize);
-    }
-    if (!qty || qty<=0) throw new Error('Miktar 0 — min kuralları');
-
-    // 3) ALIM LIMIT
-    setStatus(row,'buying', statSpan);
-    const buyRes = await proxyPOST('/trade/order', {
-      symbol: row.symbol, side:'BUY', type:'LIMIT', timeInForce:'GTC', quantity: qty.toString(), price: priceRounded.toString(), clientOrderId:'L'+Date.now()
-    });
-    const buyOrder = { createdAt:Date.now(), orderId:buyRes.orderId, symbol:row.symbol, side:'BUY', qty, price:priceRounded, status:buyRes.status||'NEW' };
-    S.orders.push(buyOrder); save(); renderActiveOrders();
-    log('info','BUY placed', buyOrder);
-
-    // 4) FILL bekle
-    setStatus(row,'wait', statSpan);
-    let filledQty = 0;
-    for (let i=0;i<180;i++){
-      await new Promise(r=>setTimeout(r, 1000));
-      const st = await proxyGET('/trade/order/status?symbol='+encodeURIComponent(row.symbol)+'&orderId='+buyRes.orderId);
-      buyOrder.status = st.status; save(); renderActiveOrders();
-      if (st.status==='FILLED'){ filledQty = parseFloat(st.executedQty); break; }
-      if (['CANCELED','REJECTED','EXPIRED'].includes(st.status)) throw new Error('BUY tamamlanmadı: '+st.status);
-      // hâlâ NEW/PARTIALLY_FILLED ise devam
-    }
-    if (!filledQty) throw new Error('Zaman aşımı: BUY dolmadı');
-
-    row.buyFilledQty = floorToStep(filledQty, row.info.stepSize);
-    // bot-bakiye güncelle
-    const base = row.symbol.replace('USDT','');
-    S.balances[base] = (S.balances[base]||0) + row.buyFilledQty; save();
-
-    histPush({ type:'BUY FILLED', msg:`${row.symbol} ${fmt(row.buyFilledQty)} @ ${fmt(priceRounded)}` });
-
-    // 5) SATIŞ LIMIT (ASK M snapshot)
-    setStatus(row,'selling', statSpan);
-    const sellRounded = roundPriceToTick(sellSnap, row.info.tickSize);
-    const sellRes = await proxyPOST('/trade/order', {
-      symbol: row.symbol, side:'SELL', type:'LIMIT', timeInForce:'GTC', quantity: row.buyFilledQty.toString(), price: sellRounded.toString(), clientOrderId:'S'+Date.now()
-    });
-    const sellOrder = { createdAt:Date.now(), orderId:sellRes.orderId, symbol:row.symbol, side:'SELL', qty:row.buyFilledQty, price:sellRounded, status:sellRes.status||'NEW' };
-    S.orders.push(sellOrder); save(); renderActiveOrders();
-    log('info','SELL placed', sellOrder);
-
-    setStatus(row,'done', statSpan);
-    renderHistory();
-    refreshBalances();
-  }catch(e){
-    setStatus(row,'error', statSpan);
-    log('error','cycle failed: '+e.message);
-  }finally{
-    save();
-  }
-}
-
-function startRow(idx, statSpan){
-  const row = S.rows[idx]; if (row.running) return;
-  row.running = true; save(); setGlobalStatus('Çalışıyor');
-  const loop = async ()=>{
-    if (!row.running) return;
-    setStatus(row,'idle', statSpan);
-    await oneCycle(idx, statSpan);
-    if (!row.running) return;
-    setTimeout(loop, 1500);
-  };
-  loops.set(idx,true); loop();
-}
-
-function stopRow(idx, statSpan){
-  const row = S.rows[idx]; row.running=false; setStatus(row,'idle', statSpan); save();
-  loops.delete(idx);
-  if (loops.size===0) setGlobalStatus('Hazır');
-}
-
-// Arkaplanda açık emir durumlarını periyodik güncelle
-setInterval(async ()=>{
-  const open = S.orders.filter(o=> !['FILLED','CANCELED','REJECTED','EXPIRED'].includes(o.status||''));
-  for(const o of open){
-    try{
-      const st = await proxyGET('/trade/order/status?symbol='+encodeURIComponent(o.symbol)+'&orderId='+o.orderId);
-      if (o.status!==st.status){
-        o.status = st.status; save(); renderActiveOrders();
-        if (st.status==='FILLED'){
-          if (o.side==='SELL'){
-            const base = o.symbol.replace('USDT','');
-            S.balances[base] = (S.balances[base]||0) - Number(o.qty||0); save();
-            histPush({ type:'SELL FILLED', msg:`${o.symbol} ${fmt(o.qty)} @ ${fmt(o.price)}` });
-            refreshBalances();
-          }
-        }
-      }
-    }catch(e){ /* sessiz */ }
-  }
-}, 3000);
-
-// ================== İlk Render ==================
-function init(){
-  renderConn(); renderRows(); renderActiveOrders(); renderHistory(); renderLogs();
-}
+// ======================== İlk yükleme ========================
+function init(){ renderConn(); renderRows(); renderOpenOrders(); renderHistory(); renderLog(); }
 init();
 
-// İlk kullanımda uyarı (slash)
-setTimeout(()=>{
-  if (S.conn.proxyUrl.endsWith('/')){
-    el('connNote').textContent = 'Uyarı: Proxy URL sonunda / var → silin.';
-  }
-}, 500);
+// Butonlar
+el('refreshOpen').onclick = ()=> renderOpenOrders();
+el('refreshBalances').onclick = ()=> refreshBalances();
+el('clearHistory').onclick = ()=>{ S.history=[]; save(); renderHistory(); };
+el('clearLog').onclick = ()=>{ S.logs=[]; save(); renderLog(); };
 
 </script>
 </body>
