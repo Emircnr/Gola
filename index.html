@@ -1,327 +1,652 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="theme-dark">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Binance Level Bot — V3 (Şık UI + Tam Akış)</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Arbitraj Radarı — OKX ⇄ Binance (USDT)</title>
 <style>
-  :root{
-    --bg:#0b0f1a; --panel:#0f1626; --panel2:#0c1322; --text:#eaf1ff; --muted:#9fb0ca;
-    --accent:#6ca8ff; --good:#2bd97f; --warn:#ffcf5a; --bad:#ff6161; --line:#1a2540; --chip:#0e1a33;
+  /* ===== Temalar ===== */
+  .theme-dark{
+    --bg:#0b1220; --panel:#111a2b; --panel2:#0f1626; --text:#e6edf6;
+    --muted:#9fb0ca; --accent:#60a5fa; --border:#17243e;
+    --headerStart:#0e172a; --headerEnd:#0b1220;
+    --chipBg:#1a243e; --chipBorder:#2a3d64;
+    --greenBg:#0f2a1b; --greenBd:#184a2b; --greenTx:#b6f7c8;
   }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;background:radial-gradient(1200px 600px at 80% -10%,rgba(96,165,250,.1),transparent),radial-gradient(1000px 500px at -10% 0,rgba(43,217,127,.09),transparent),var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-  .app{max-width:1260px;margin:26px auto;padding:0 16px;display:grid;gap:16px;grid-template-rows:auto auto 1fr auto}
-  header{display:flex;align-items:center;justify-content:space-between}
-  header h1{margin:0;font-size:20px;letter-spacing:.3px}
-  .brand{display:flex;gap:10px;align-items:center}
-  .brand .dot{width:10px;height:10px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#8fe3ff)}
-  .kpis{display:flex;gap:10px;flex-wrap:wrap}
-  .chip{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;background:linear-gradient(180deg,#0f1c36,#0b1326);border:1px solid #142347;border-radius:999px;color:#cfe1ff}
-  .chip b{color:#fff}
+  .theme-light{
+    --bg:#ffffff; --panel:#f3f6fb; --panel2:#ffffff; --text:#0b1220;
+    --muted:#4a5568; --accent:#2563eb; --border:#d7deea;
+    --headerStart:#eaf1ff; --headerEnd:#ffffff;
+    --chipBg:#eef3ff; --chipBorder:#c8d6f5;
+    --greenBg:#e9f8ef; --greenBd:#b9e5c8; --greenTx:#166534;
+  }
 
-  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
-  .panel{padding:14px 16px}
-  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-  .row3{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:16px}
-  .grid{display:grid;gap:16px}
-  .btn{background:linear-gradient(180deg,var(--accent),#8ec3ff);color:#041021;border:none;border-radius:12px;padding:10px 14px;font-weight:700;cursor:pointer;transition:.15s transform}
-  .btn:hover{transform:translateY(-1px)}
-  .btn.secondary{background:#1b2947;color:#cfe1ff}
-  .btn.ghost{background:transparent;border:1px solid #24365f;color:#cfe1ff}
-  .btn.bad{background:linear-gradient(180deg,#ff7b7b,#ff6161);color:#fff}
-  .btn.warn{background:linear-gradient(180deg,#ffd36a,#ffbd3a);color:#1d1200}
-  input,select{width:100%;background:#0a1324;border:1px solid #1f2b4d;color:var(--text);padding:10px 12px;border-radius:12px;outline:none}
-  label{font-size:12px;color:#9fb0ca;margin-bottom:6px;display:block}
-  table{width:100%;border-collapse:collapse}
-  th,td{padding:9px 10px;border-bottom:1px solid #182447;font-size:14px}
-  th{color:#a9bad6;text-align:left;font-weight:600}
-  .right{justify-content:flex-end}
-  .small{font-size:12px;color:#9fb0ca}
-  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
-  .status{padding:2px 8px;border-radius:999px;border:1px solid #203058;font-size:12px;color:#cfe1ff;background:#0c1833}
-  .s-idle{background:#0c1833}
-  .s-buying{background:#0f234d}
-  .s-wait{background:#2b2408;color:#ffd36a}
-  .s-selling{background:#0f3a2a;color:#bdf8d5}
-  .s-done{background:#0e2b1f;color:#8cf0b4}
-  .s-error{background:#331212;color:#ffb5b5}
-  .scroll{max-height:280px;overflow:auto;border:1px solid #182447;border-radius:12px;background:#0a1324}
-  .logline{padding:8px 10px;border-bottom:1px solid #122041;font-size:13px}
-  .logline .ts{opacity:.7;margin-right:8px}
-  .toolbar{display:flex;gap:8px;flex-wrap:wrap}
-  .hint{background:#0b162c;border:1px dashed #22345f;padding:8px 10px;border-radius:12px}
-  .divider{height:1px;background:#1a2540;margin:10px 0}
-  .ok{color:var(--good)} .warnc{color:var(--warn)} .badc{color:var(--bad)}
+  /* ===== KİŞİSELLEŞTİRME ile AYARLANAN DEĞİŞKENLER ===== */
+  :root{
+    --table-font:18px;
+    --cell-pad-y:12px;
+    --cell-pad-x:10px;
+    --row-gap:6px;
+    --cell-radius:12px;
+    --container-max:1100px;
+    --col-coin:28%;
+    --col-al:27%;
+    --col-sat:27%;
+    --col-pct:18%;
+    --card-font:22px;
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+  header{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;background:linear-gradient(180deg,var(--headerStart),var(--headerEnd));border-bottom:1px solid var(--border)}
+  header h1{margin:0;font-size:20px}
+  header .sub{color:var(--muted);font-size:12px}
+  header .rightBox{display:flex;gap:14px;align-items:center}
+  .btn{background:var(--accent);color:#091220;border:none;border-radius:10px;padding:10px 12px;font-weight:600;cursor:pointer}
+  .ghost{background:var(--panel);color:var(--text);border:1px solid var(--border)}
+
+  /* En Yüksek Fark — sade tek satır */
+  .hiWrap{padding:10px 16px}
+  .hidden{display:none}
+  .hiLine{
+    font-size:var(--card-font);font-weight:800;letter-spacing:.2px;
+    background:var(--panel2);border:1px solid var(--border);
+    border-left:6px solid #22c55e;border-radius:14px;padding:10px 14px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap
+  }
+  .hiGreen{background:var(--greenBg);border:1px solid var(--greenBd);color:var(--greenTx);
+    border-radius:999px;padding:4px 10px;font-weight:800}
+
+  /* Üst kontrol şeritleri */
+  .controls{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;padding:12px 16px;background:var(--panel);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+  .ctrl{background:var(--panel2);border:1px solid var(--border);border-radius:12px;padding:10px}
+  .ctrl label{font-size:12px;color:var(--muted);display:block;margin-bottom:6px}
+  .row{display:flex;gap:8px;align-items:center}
+  input[type="text"], input[type="number"], select{
+    width:100%;background:var(--panel2);border:1px solid var(--border);color:var(--text);
+    border-radius:10px;padding:10px 12px;font-size:14px;outline:none
+  }
+  input[type="range"]{width:100%}
+
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{display:inline-flex;gap:6px;align-items:center;background:var(--chipBg);border:1px solid var(--chipBorder);border-radius:999px;padding:5px 10px;font-size:12px}
+  .chip button{all:unset;cursor:pointer;color:#4f79ff}
+
+  /* TABLO — kişiselleştirilebilir büyüklük/mesafe/genişlik */
+  .tableWrap{padding:12px 16px;max-width:var(--container-max);margin:0 auto}
+  table{width:100%;border-collapse:separate;border-spacing:0 var(--row-gap);table-layout:fixed}
+  thead th{font-size:calc(var(--table-font) - 4px);color:var(--muted);text-align:center;padding:0 8px}
+  thead th:first-child{text-align:left}
+  tbody tr{background:var(--panel2);border:1px solid var(--border)}
+  tbody td{padding:var(--cell-pad-y) var(--cell-pad-x);font-size:var(--table-font)}
+  tbody tr td:first-child{border-top-left-radius:var(--cell-radius);border-bottom-left-radius:var(--cell-radius)}
+  tbody tr td:last-child{border-top-right-radius:var(--cell-radius);border-bottom-right-radius:var(--cell-radius)}
+  .mono{font-variant-numeric:tabular-nums; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace}
+  .muted{color:var(--muted)}
+  .coinCell{display:flex;align-items:center;gap:10px}
+  .coinSym{font-weight:800}
+  .alCell,.satCell,.pctCell{text-align:center;font-weight:800}
 </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <div class="brand"><div class="dot"></div><h1>Binance Level Bot — <span class="small">V3</span></h1></div>
-    <div class="kpis">
-      <div class="chip">Durum: <b id="gStatus">Hazır</b></div>
-      <div class="chip">Saat ofseti: <b id="gOffset">-</b></div>
-      <div class="chip">Açık Emir: <b id="gOpen">0</b></div>
-    </div>
-  </header>
+<header>
+  <div>
+    <h1>Arbitraj Radarı — OKX ⇄ Binance (USDT)</h1>
+    <div class="sub">Son: <span id="last" class="mono">—</span></div>
+  </div>
+  <div class="rightBox">
+    <div id="btcBox" class="sub">BTCUSDT: <span id="btc" class="mono">—</span></div>
+    <button id="toggleHi" class="btn ghost">En Yüksek Fark: Açık</button>
+    <button id="toggleCustom" class="btn ghost">Kişiselleştir: Kapalı</button>
+    <div class="sub">İzlenen: <span id="cnt">0</span> · Hata: <span id="err">0</span></div>
+  </div>
+</header>
 
-  <!-- Bağlantı Ayarları -->
-  <section class="card panel">
+<!-- Highlight kartı için yerleşim noktaları -->
+<div id="anchorTop"></div>
+
+<!-- EN YÜKSEK FARK — "ACM OKX AL 1.2345 USDT %0,23" -->
+<section id="hiWrap" class="hiWrap">
+  <div class="hiLine">
+    <span id="hiCoin">—</span>
+    <span class="hiGreen" id="hiAct">OKX • —</span>
+    <span id="hiPrice" class="mono">—</span>
+    <span id="hiPct" class="mono">—</span>
+  </div>
+</section>
+
+<section class="controls">
+  <div class="ctrl">
+    <label>Coin Ekle / Çıkar</label>
     <div class="row">
-      <div>
-        <label>Proxy URL (Cloudflare Worker) — <span class="small">sonunda <span class="mono">/</span> olmasın</span></label>
-        <input id="proxyUrl" placeholder="https://<senin-worker>.workers.dev" />
-      </div>
-      <div>
-        <label>Binance Base URL (ops.)</label>
-        <input id="baseUrl" placeholder="https://api.binance.com" />
-      </div>
+      <input id="coinIn" type="text" placeholder="Örn: ZIL, XAI, MINA"/>
+      <button id="add" class="btn">Ekle</button>
+      <button id="clear" class="btn ghost">Temizle</button>
     </div>
-    <div class="row" style="margin-top:12px">
-      <div>
-        <label>API Key (opsiyonel — Workers Secrets kullanıyorsan boş bırak)</label>
-        <input id="apiKey" placeholder="API Key" />
-      </div>
-      <div>
-        <label>Secret Key (opsiyonel)</label>
-        <input id="apiSecret" type="password" placeholder="Secret Key" />
-      </div>
-    </div>
-    <div class="toolbar right" style="margin-top:12px">
-      <button class="btn secondary" id="saveConn">Kaydet</button>
-      <button class="btn" id="testConn">Bağlantıyı Test Et</button>
-      <button class="btn ghost" id="syncTime" disabled>Saati Senkronize Et</button>
-    </div>
-    <div class="hint small" id="connNote" style="margin-top:10px">Önce Proxy URL yazıp <b>Kaydet</b> → sonra <b>Bağlantıyı Test Et</b>.</div>
-  </section>
+    <div id="chips" class="chips"></div>
+  </div>
 
-  <!-- Üçlü Kolon: Çiftler / Aktif Emirler / Bakiyeler -->
-  <section class="row3">
-    <!-- Çiftler -->
-    <div class="card panel">
-      <div class="toolbar" style="justify-content:space-between; margin-bottom:6px">
-        <div class="small"><b>Akış:</b> Alım = <span class="mono">BID N</span>, Dolunca Satış = <span class="mono">ASK M</span>. Miktar kurallara göre otomatik yuvarlanır.</div>
-        <div class="toolbar">
-          <button class="btn" id="addRow">+ Çift Ekle</button>
-          <button class="btn warn" id="startAll">Başlat</button>
-          <button class="btn bad" id="stopAll">Durdur</button>
+  <div class="ctrl">
+    <label>Yenileme Aralığı (0.1–4.0 sn)</label>
+    <div class="row">
+      <input id="rng" type="range" min="100" max="4000" step="100">
+      <div class="mono" id="rngLbl">—</div>
+    </div>
+    <div class="muted" style="font-size:12px;margin-top:6px">PyQt5 mantığı korunur; sadece periyot ayarlanır.</div>
+  </div>
+
+  <div class="ctrl">
+    <label>Min. % Fark (filtre)</label>
+    <div class="row">
+      <input id="minPct" type="number" step="0.01" min="0" value="0.00"/>
+    </div>
+    <div class="muted" style="font-size:12px;margin-top:6px">Bu eşiği aşmayan satırlar listelenmez.</div>
+  </div>
+
+  <div class="ctrl">
+    <label>Tema</label>
+    <div class="row">
+      <select id="themeSel">
+        <option value="dark">Koyu</option>
+        <option value="light">Açık</option>
+      </select>
+    </div>
+  </div>
+</section>
+
+<!-- KİŞİSELLEŞTİR paneli (aç/kapa) -->
+<section id="customWrap" class="customWrap hidden">
+  <div class="customPanel">
+    <div class="grid3">
+      <div>
+        <div class="rowLabel">Tablo Yazı Boyutu</div>
+        <div class="kv">
+          <input id="ui_tableFont" type="range" min="14" max="26" step="1">
+          <span class="val" id="ui_tableFont_val"></span>
         </div>
       </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Sembol</th>
-            <th>Tutar/Miktar</th>
-            <th>Mod</th>
-            <th>BID N</th>
-            <th>ASK M</th>
-            <th>Durum</th>
-            <th>Aksiyon</th>
-          </tr>
-        </thead>
-        <tbody id="pairsBody"></tbody>
-      </table>
-    </div>
-
-    <!-- Aktif Emirler -->
-    <div class="card panel">
-      <div class="toolbar" style="justify-content:space-between; margin-bottom:6px">
-        <div><b>Aktif Emirler</b></div>
-        <div class="toolbar">
-          <button class="btn secondary" id="refreshOpen">Yenile</button>
+      <div>
+        <div class="rowLabel">Satır İç Boşluk (Y)</div>
+        <div class="kv">
+          <input id="ui_padY" type="range" min="6" max="24" step="1">
+          <span class="val" id="ui_padY_val"></span>
         </div>
       </div>
-      <div class="scroll" id="openOrdersBox"></div>
-    </div>
-
-    <!-- Bakiyeler -->
-    <div class="card panel">
-      <div class="toolbar" style="justify-content:space-between; margin-bottom:6px">
-        <div><b>Bakiyeler</b></div>
-        <div class="toolbar">
-          <button class="btn secondary" id="refreshBalances">Yenile</button>
+      <div>
+        <div class="rowLabel">Satır İç Boşluk (X)</div>
+        <div class="kv">
+          <input id="ui_padX" type="range" min="6" max="24" step="1">
+          <span class="val" id="ui_padX_val"></span>
         </div>
       </div>
-      <div id="balancesBox" class="small">Hesap bakiyeleri için Worker'da <span class="mono">/api/account</span> ucu tanımlı olmalı (koydum). Secret'ları eklediğinden emin ol.</div>
     </div>
-  </section>
 
-  <!-- Son İşlemler & Loglar -->
-  <section class="grid" style="grid-template-columns:1fr 1fr">
-    <div class="card panel">
-      <div class="toolbar" style="justify-content:space-between; margin-bottom:6px">
-        <div><b>Son İşlemler</b> <span class="small">(BUY/SELL fill)</span></div>
-        <button class="btn secondary" id="clearHistory">Temizle</button>
+    <div class="grid3">
+      <div>
+        <div class="rowLabel">Satır Boşluğu (Gap)</div>
+        <div class="kv">
+          <input id="ui_rowGap" type="range" min="0" max="20" step="1">
+          <span class="val" id="ui_rowGap_val"></span>
+        </div>
       </div>
-      <div class="scroll" id="historyBox"></div>
-    </div>
-    <div class="card panel">
-      <div class="toolbar" style="justify-content:space-between; margin-bottom:6px">
-        <div><b>Canlı Log</b></div>
-        <button class="btn secondary" id="clearLog">Temizle</button>
+      <div>
+        <div class="rowLabel">Köşe Radius</div>
+        <div class="kv">
+          <input id="ui_radius" type="range" min="0" max="24" step="1">
+          <span class="val" id="ui_radius_val"></span>
+        </div>
       </div>
-      <div class="scroll" id="logBox"></div>
+      <div>
+        <div class="rowLabel">Tablo Genişliği (px)</div>
+        <div class="kv">
+          <input id="ui_maxW" type="range" min="800" max="1600" step="10">
+          <span class="val" id="ui_maxW_val"></span>
+        </div>
+      </div>
     </div>
-  </section>
 
-  <footer class="small">
-    <div class="divider"></div>
-    <div>İpucu: Proxy URL sonunda <span class="mono">/</span> olmasın. Önce küçük tutarlarla test et. Hata durumunda üstteki <b>Bağlantıyı Test Et</b> butonu hızlı teşhis yapar.</div>
-  </footer>
-</div>
+    <div>
+      <div class="rowLabel">Sütun Genişlikleri (%) — toplam 100</div>
+      <div class="grid4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px">
+        <div class="kv"><span class="val" style="min-width:auto">Coin</span><input id="ui_colCoin" type="number" min="10" max="60" step="1" style="width:80px"></div>
+        <div class="kv"><span class="val" style="min-width:auto">AL</span><input id="ui_colAl" type="number" min="10" max="60" step="1" style="width:80px"></div>
+        <div class="kv"><span class="val" style="min-width:auto">SAT</span><input id="ui_colSat" type="number" min="10" max="60" step="1" style="width:80px"></div>
+        <div class="kv"><span class="val" style="min-width:auto">% Fark</span><input id="ui_colPct" type="number" min="10" max="60" step="1" style="width:80px"></div>
+      </div>
+      <div class="muted" id="ui_colSum" style="font-size:12px;margin-top:4px"></div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <div class="rowLabel">En Yüksek Fark Kartı Yazı Boyutu</div>
+        <div class="kv">
+          <input id="ui_cardFont" type="range" min="16" max="36" step="1">
+          <span class="val" id="ui_cardFont_val"></span>
+        </div>
+      </div>
+      <div>
+        <div class="rowLabel">En Yüksek Fark Kartı Konumu</div>
+        <select id="ui_hiPos">
+          <option value="top">Üstte (Başlık altında)</option>
+          <option value="afterControls">Kontrollerin altında</option>
+          <option value="afterTable">Tablonun altında</option>
+          <option value="hidden">Gizli</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="grid3">
+      <label class="kv" style="gap:6px"><input id="ui_showBTC" type="checkbox" checked> BTC Fiyatını Göster</label>
+      <div></div><div></div>
+    </div>
+
+    <div class="footerBtns" style="display:flex;gap:8px;justify-content:flex-end">
+      <button id="ui_reset" class="btn ghost">Varsayılanlara Dön</button>
+    </div>
+  </div>
+</section>
+
+<!-- Kontrollerin altına yerleştirme için kanca -->
+<div id="anchorAfterControls"></div>
+
+<section class="tableWrap">
+  <table>
+    <colgroup>
+      <col id="colCoin" style="width:var(--col-coin);">
+      <col id="colAl"   style="width:var(--col-al);">
+      <col id="colSat"  style="width:var(--col-sat);">
+      <col id="colPct"  style="width:var(--col-pct);">
+    </colgroup>
+    <thead>
+      <tr>
+        <th style="text-align:left">Coin</th>
+        <th>AL</th>
+        <th>SAT</th>
+        <th>% Fark</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</section>
+
+<!-- Tablonun altına yerleştirme için kanca -->
+<div id="anchorAfterTable"></div>
 
 <script>
-// ======================== Durum / Depo ========================
-const el = id => document.getElementById(id);
-const fmt = n => new Intl.NumberFormat('tr-TR',{maximumFractionDigits:8}).format(Number(n||0));
-const S = JSON.parse(localStorage.getItem('botV3')||'{}');
-S.conn = S.conn || { proxyUrl:'', baseUrl:'', apiKey:'', apiSecret:'', timeOffsetMs:0 };
-S.rows = S.rows || [ rowDefault('DYMUSDT') ];
-S.orders = S.orders || [];      // botun açtığı emirler {orderId,symbol,side,qty,price,status}
-S.history = S.history || [];    // {t,type,msg,extra}
-S.logs = S.logs || [];
-S.cache = S.cache || {};        // küçük bellek
-
-function rowDefault(symbol){
-  return { symbol:symbol||'BTCUSDT', mode:'QUOTE', amount:10, buyLevel:2, sellLevel:3, running:false, status:'idle', info:null, activeOrderId:null, buyFilledQty:null };
+/* ====== Yardımcılar + Kalıcı Hafıza ====== */
+const $ = s => document.querySelector(s);
+const LS = {
+  get(key, def){ try{ const v = localStorage.getItem(key); return v==null ? def : JSON.parse(v); }catch{ return def; } },
+  set(key, val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch{} }
+};
+function norm(sym){
+  if(!sym) return '';
+  return sym.trim().toUpperCase()
+    .replaceAll('İ','I').replaceAll('İ','I')
+    .replaceAll('Ç','C').replaceAll('Ğ','G').replaceAll('Ö','O').replaceAll('Ş','S').replaceAll('Ü','U');
 }
-function save(){ localStorage.setItem('botV3', JSON.stringify(S)); }
-function log(type,msg,data){ S.logs.push({t:Date.now(),type,msg,data:data||null}); if(S.logs.length>400) S.logs.shift(); save(); renderLog(); }
-function hist(type,msg,extra){ S.history.unshift({t:Date.now(),type,msg,extra:extra||null}); if(S.history.length>200) S.history.pop(); save(); renderHistory(); }
+function fmtFixedTR(n, d=2){
+  if(n==null || !isFinite(n)) return '—';
+  return Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d, maximumFractionDigits:d});
+}
+function fmtPctTR(n, d=2){
+  if(n==null || !isFinite(n)) return '—';
+  return '%'+Number(n).toLocaleString('tr-TR',{minimumFractionDigits:d, maximumFractionDigits:d});
+}
+function fmt4(n){ return (n==null||!isFinite(n)) ? '—' : Number(n).toFixed(4); }
+function nowStr(){ return new Date().toLocaleTimeString('tr-TR'); }
 
-// ======================== URL & Fetch Helpers ========================
-function isValidUrl(u){ try{ const ok = /^https?:\/\//i.test(u); return !!ok; }catch(_){ return false; } }
-function join(base, path){ const b=(base||'').replace(/\/+$/,''); const p=(path||'').replace(/^\/+/, ''); return b + '/' + p; }
-function buildUrl(path, q){ let u = join(S.conn.proxyUrl, path); const params = new URLSearchParams(q||{}); if (S.conn.baseUrl) params.set('baseUrl', S.conn.baseUrl); const qs=params.toString(); if(qs) u += (u.includes('?')?'&':'?')+qs; return u; }
-async function httpGet(path, q){ const url = buildUrl(path, q); const headers = {}; if(S.conn.apiKey) headers['X-API-KEY']=S.conn.apiKey; if(S.conn.apiSecret) headers['X-API-SECRET']=S.conn.apiSecret; const r = await fetch(url,{headers}); let js={}; try{ js=await r.json(); }catch{} if(!r.ok) throw new Error(js.message||js.msg||(`${r.status} ${r.statusText}`)); return js; }
-async function httpPost(path, body){ const url = buildUrl(path); const headers={'Content-Type':'application/json'}; if(S.conn.apiKey) headers['X-API-KEY']=S.conn.apiKey; if(S.conn.apiSecret) headers['X-API-SECRET']=S.conn.apiSecret; const r = await fetch(url,{method:'POST',headers,body:JSON.stringify(body||{})}); let js={}; try{ js=await r.json(); }catch{} if(!r.ok) throw new Error(js.message||js.msg||(`${r.status} ${r.statusText}`)); return js; }
+/* ====== Durum ====== */
+let watched = new Set(LS.get('okxbin:watched', []));
+let refreshMs = Number(LS.get('okxbin:interval', 1000));
+let minPctFilter = Number(LS.get('okxbin:minpct', 0.00));
+let themeMode = LS.get('okxbin:theme', 'dark');
+let hiOn = LS.get('okxbin:hiOn', true);
 
-// ======================== Bağlantı UI ========================
-function renderConn(){ el('proxyUrl').value=S.conn.proxyUrl||''; el('baseUrl').value=S.conn.baseUrl||''; el('apiKey').value=S.conn.apiKey||''; el('apiSecret').value=S.conn.apiSecret||''; el('gOffset').textContent=(S.conn.timeOffsetMs||0)+' ms'; }
-function setStatus(s){ el('gStatus').textContent=s; }
-function setOpenCount(){ const open=S.orders.filter(o=>!['FILLED','CANCELED','REJECTED','EXPIRED'].includes(o.status||'')); el('gOpen').textContent=open.length; }
+const UI_DEFAULTS = {
+  tableFont: 18,
+  padY: 12,
+  padX: 10,
+  rowGap: 6,
+  radius: 12,
+  maxW: 1100,
+  col: { coin:28, al:27, sat:27, pct:18 },
+  cardFont: 22,
+  hiPos: 'top',       // 'top' | 'afterControls' | 'afterTable' | 'hidden'
+  showBTC: true
+};
+let UI = Object.assign({}, UI_DEFAULTS, LS.get('okxbin:UI', UI_DEFAULTS));
+if(!UI.col) UI.col = { coin:28, al:27, sat:27, pct:18 };
 
-el('saveConn').onclick = ()=>{ S.conn.proxyUrl=el('proxyUrl').value.trim(); S.conn.baseUrl=el('baseUrl').value.trim(); S.conn.apiKey=el('apiKey').value.trim(); S.conn.apiSecret=el('apiSecret').value.trim(); save(); renderConn(); el('connNote').textContent='Kaydedildi. Şimdi Bağlantıyı Test Et'; log('info','Connection saved',{proxy:S.conn.proxyUrl}); };
+let timer = null, updating = false, errors = 0;
 
-el('testConn').onclick = async ()=>{
+const elLast = $('#last'), elCnt = $('#cnt'), elErr = $('#err'),
+      elBody = $('#tbody'), elRngLbl = $('#rngLbl'), elRng = $('#rng'), elMin = $('#minPct'),
+      elThemeSel = $('#themeSel'), elBtc = $('#btc'), elBtcBox = $('#btcBox'),
+      elHiWrap = $('#hiWrap'), elHiCoin = $('#hiCoin'), elHiAct = $('#hiAct'),
+      elHiPrice = $('#hiPrice'), elHiPct = $('#hiPct'), elHiToggle = $('#toggleHi'),
+      elCustomWrap = $('#customWrap'), elCustomToggle = $('#toggleCustom');
+
+/* ====== Ağ ====== */
+function okxTicker(sym){ return `https://www.okx.com/api/v5/market/ticker?instId=${encodeURIComponent(sym)}-USDT`; }
+function binanceBook(sym){ return `https://api.binance.com/api/v3/ticker/bookTicker?symbol=${encodeURIComponent(sym)}USDT`; }
+const BINANCE_BTC_PRICE = 'https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT';
+
+async function jget(url){
+  const res = await fetch(url, {cache:'no-store'});
+  if(!res.ok) throw new Error('HTTP '+res.status);
+  return res.json();
+}
+function parseOkxTicker(json){
+  // OKX ticker: { code:"0", data:[{ bidPx:"", askPx:"", ... }] }
+  if(!json || !json.data || !json.data[0]) return {bid:NaN, ask:NaN};
+  const d = json.data[0];
+  const bid = parseFloat(d.bidPx);
+  const ask = parseFloat(d.askPx);
+  return {bid, ask};
+}
+
+/* ====== Mantık (PyQt5 ile birebir, OKX↔Binance USDT) ====== */
+async function tick(){
+  if(updating) return;
+  updating = true;
   try{
-    if(!isValidUrl(S.conn.proxyUrl)) throw new Error('Proxy URL geçersiz. https:// ile başlamalı ve sonunda / olmamalı.');
-    el('connNote').textContent='Test ediliyor...';
-    // 1) /api/time
-    const t = await httpGet('/api/time');
-    if(!t || !t.serverTime) throw new Error('/api/time başarısız');
-    // 2) /api/exchangeInfo
-    const ex = await httpGet('/api/exchangeInfo', {symbol:'BTCUSDT'});
-    if(!ex || !ex.symbols || !ex.symbols.length) throw new Error('/api/exchangeInfo başarısız');
-    el('connNote').innerHTML = `<span class='ok'>Bağlantı OK</span> — <span class='mono'>/api/time</span> ve <span class='mono'>/api/exchangeInfo</span> çalışıyor.`;
-    el('syncTime').disabled=false;
-    log('info','Connection test OK');
-  }catch(e){ el('connNote').innerHTML = `<span class='badc'>Hata:</span> ${e.message}`; el('syncTime').disabled=true; log('warn','Connection test failed',{error:e.message}); }
-};
+    // BTC canlı (opsiyonel)
+    if(UI.showBTC){
+      try{
+        const btc = await jget(BINANCE_BTC_PRICE);
+        const p = parseFloat(btc.price);
+        if(isFinite(p)) elBtc.textContent = fmtFixedTR(p, 2);
+      }catch(e){}
+    }
 
-el('syncTime').onclick = async ()=>{
-  try{ const t0=Date.now(); const data = await httpGet('/api/time'); const t1=Date.now(); const approx=(t0+t1)/2; S.conn.timeOffsetMs=Math.round((data.serverTime||approx)-approx); save(); renderConn(); log('info','Time synced',{offset:S.conn.timeOffsetMs}); }
-  catch(e){ S.conn.timeOffsetMs=0; save(); renderConn(); log('warn','Time sync failed',{error:e.message}); }
-};
+    if(watched.size===0){
+      elBody.innerHTML = '';
+      updateHighlight([]);
+      elLast.textContent = nowStr();
+      updating = false;
+      return;
+    }
 
-// ======================== Çiftler Tablosu ========================
-function renderRows(){ const body=el('pairsBody'); body.innerHTML=''; S.rows.forEach((row,idx)=> addRowUI(row,idx)); }
-function addRowUI(row,idx){
-  const tr=document.createElement('tr');
-  // Sembol
-  const tdS=document.createElement('td'); const iS=document.createElement('input'); iS.value=row.symbol; iS.onchange=()=>{row.symbol=iS.value.trim().toUpperCase(); save();}; tdS.appendChild(iS);
-  // Tutar/Miktar
-  const tdA=document.createElement('td'); const iA=document.createElement('input'); iA.type='number'; iA.step='any'; iA.value=row.amount; iA.onchange=()=>{row.amount=parseFloat(iA.value)||0; save();}; tdA.appendChild(iA);
-  // Mod
-  const tdM=document.createElement('td'); const sel=document.createElement('select'); sel.innerHTML='<option value="QUOTE">QUOTE(USDT)</option><option value="BASE">BASE(Miktar)</option>'; sel.value=row.mode; sel.onchange=()=>{row.mode=sel.value; save();}; tdM.appendChild(sel);
-  // BID N
-  const tdB=document.createElement('td'); const iB=document.createElement('input'); iB.type='number'; iB.min='1'; iB.value=row.buyLevel; iB.onchange=()=>{row.buyLevel=parseInt(iB.value)||1; save();}; tdB.appendChild(iB);
-  // ASK M
-  const tdSM=document.createElement('td'); const iSM=document.createElement('input'); iSM.type='number'; iSM.min='1'; iSM.value=row.sellLevel; iSM.onchange=()=>{row.sellLevel=parseInt(iSM.value)||1; save();}; tdSM.appendChild(iSM);
-  // Durum
-  const tdSt=document.createElement('td'); const chip=document.createElement('span'); chip.className='status s-'+row.status; chip.textContent=row.status; tdSt.appendChild(chip);
-  // Aksiyonlar
-  const tdAct=document.createElement('td');
-  const bStart=document.createElement('button'); bStart.className='btn'; bStart.textContent='Başlat'; bStart.onclick=()=>startRow(idx,chip);
-  const bStop=document.createElement('button'); bStop.className='btn secondary'; bStop.style.marginLeft='6px'; bStop.textContent='Durdur'; bStop.onclick=()=>stopRow(idx,chip);
-  const bDel=document.createElement('button'); bDel.className='btn bad'; bDel.style.marginLeft='6px'; bDel.textContent='Sil'; bDel.onclick=()=>{ S.rows.splice(idx,1); save(); renderRows(); };
-  tdAct.append(bStart,bStop,bDel);
-  tr.append(tdS,tdA,tdM,tdB,tdSM,tdSt,tdAct); el('pairsBody').appendChild(tr);
+    const syms = Array.from(watched);
+    const jobs = syms.map(async sym=>{
+      const symbol = norm(sym);
+      const okxJson = await jget(okxTicker(symbol));
+      const okxBest = parseOkxTicker(okxJson);
+
+      const bJson = await jget(binanceBook(symbol));
+      const bBid = parseFloat(bJson.bidPrice);
+      const bAsk = parseFloat(bJson.askPrice);
+
+      // PyQt5 hesapları (Paribu yerine OKX):
+      // diff1 = OKX_bid - Binance_ask  (Binance'den al, OKX'te sat)
+      // diff2 = Binance_bid - OKX_ask  (OKX'ten al, Binance'de sat)
+      const diff1 = okxBest.bid - bAsk;
+      const diff2 = bBid - okxBest.ask;
+
+      let show=false, low=0, high=0, pct=0, lowSrc='', highSrc='';
+      let okxAction=null, okxPrice=null;
+
+      if((diff1>0 || diff2>0) && isFinite(okxBest.bid) && isFinite(okxBest.ask) && isFinite(bBid) && isFinite(bAsk)){
+        show = true;
+        if(diff1 > diff2){
+          pct = (diff1 / bAsk) * 100;
+          low = bAsk; high = okxBest.bid; lowSrc='Binance'; highSrc='OKX';
+          okxAction = 'SAT'; okxPrice = okxBest.bid;
+        }else{
+          pct = (diff2 / okxBest.ask) * 100;
+          low = okxBest.ask; high = bBid; lowSrc='OKX'; highSrc='Binance';
+          okxAction = 'AL'; okxPrice = okxBest.ask;
+        }
+      }
+      return {sym: symbol, show, low, high, pct, lowSrc, highSrc, okxAction, okxPrice};
+    });
+
+    let rows = await Promise.all(jobs);
+    rows = rows.filter(r => r && r.show && isFinite(r.pct) && r.pct >= (Number(minPctFilter)||0));
+    rows.sort((a,b)=> b.pct - a.pct);
+    draw(rows);
+    updateHighlight(rows);
+
+    elLast.textContent = nowStr();
+  }catch(e){
+    errors++; elErr.textContent = errors;
+  }finally{
+    updating = false;
+  }
 }
 
-el('addRow').onclick=()=>{ S.rows.push(rowDefault('BTCUSDT')); save(); renderRows(); };
-el('startAll').onclick=()=> S.rows.forEach((_,i)=> startRow(i));
-el('stopAll').onclick =()=> S.rows.forEach((_,i)=> stopRow(i));
+/* ====== Çizim ====== */
+function draw(rows){
+  const frag = document.createDocumentFragment();
+  rows.forEach(r=>{
+    const tr = document.createElement('tr');
 
-// ======================== Emir Akışı ========================
-function decFromStep(step){ const s=(step+"").split('.')[1]||''; return s.length; }
-function floorToStep(v, step){ step=parseFloat(step); return Math.floor((v+1e-12)/step)*step; }
-function roundTick(p, tick){ const d=decFromStep(tick); const m=Math.pow(10,d); return Math.floor(p*m+1e-9)/m; }
+    // Coin
+    const tdCoin = document.createElement('td');
+    tdCoin.className = 'coinCell';
+    const sym = document.createElement('span'); sym.className='coinSym'; sym.textContent = r.sym;
+    tdCoin.appendChild(sym);
+    tr.appendChild(tdCoin);
 
-async function ensureInfo(row){ if(row.info) return; const ex=await httpGet('/api/exchangeInfo',{symbol:row.symbol}); const sym=ex.symbols && ex.symbols[0]; if(!sym) throw new Error('exchangeInfo yok: '+row.symbol); const pf=sym.filters.find(f=>f.filterType==='PRICE_FILTER'); const lf=sym.filters.find(f=>f.filterType==='LOT_SIZE') || sym.filters.find(f=>f.filterType==='MARKET_LOT_SIZE'); const mn=sym.filters.find(f=>f.filterType==='MIN_NOTIONAL'); row.info={ tickSize: pf?pf.tickSize:'0.0001', stepSize: lf?lf.stepSize:'0.0001', minQty: lf?parseFloat(lf.minQty):0, minNotional: mn?parseFloat(mn.minNotional):0 }; save(); }
+    // AL (düşük fiyat kaynağına göre renk) — OKX yeşil, Binance turuncu
+    const tdL = document.createElement('td'); tdL.className='mono alCell';
+    tdL.textContent = fmt4(r.low);
+    tdL.style.background = (r.lowSrc==='Binance') ? 'orange' : 'green';
+    tr.appendChild(tdL);
 
-const loops=new Map();
-function setChip(chip,row,s){ row.status=s; chip.className='status s-'+s; chip.textContent=s; save(); }
-async function cycle(idx, chip){ const row=S.rows[idx]; try{
-  await ensureInfo(row);
-  const lim=Math.max(row.buyLevel,row.sellLevel);
-  const depth=await httpGet('/api/depth',{symbol:row.symbol,limit:lim});
-  const bids=depth.bids||[], asks=depth.asks||[]; if(bids.length<row.buyLevel||asks.length<row.sellLevel) throw new Error('Derinlik yetersiz');
-  const buyPx=parseFloat(bids[row.buyLevel-1][0]); const sellSnap=parseFloat(asks[row.sellLevel-1][0]);
-  let qty=(row.mode==='QUOTE')?(row.amount/buyPx):row.amount; qty=Math.max(qty,row.info.minQty||0); qty=floorToStep(qty,row.info.stepSize); const px=roundTick(buyPx,row.info.tickSize);
-  if(px*qty < (row.info.minNotional||0)) qty=floorToStep((row.info.minNotional+1e-9)/px,row.info.stepSize);
-  if(!qty||qty<=0) throw new Error('Miktar 0 — min kuralları');
+    // SAT (yüksek fiyat) — OKX yeşil, Binance turuncu
+    const tdH = document.createElement('td'); tdH.className='mono satCell';
+    tdH.textContent = fmt4(r.high);
+    tdH.style.background = (r.highSrc==='OKX') ? 'green' : 'orange';
+    tr.appendChild(tdH);
 
-  setChip(chip,row,'buying');
-  const buy=await httpPost('/trade/order',{symbol:row.symbol,side:'BUY',type:'LIMIT',timeInForce:'GTC',quantity:String(qty),price:String(px),clientOrderId:'L'+Date.now()});
-  const buyOrder={createdAt:Date.now(),orderId:buy.orderId,symbol:row.symbol,side:'BUY',qty,price:px,status:buy.status||'NEW'}; S.orders.push(buyOrder); save(); setOpenCount(); renderOpenOrders(); log('info','BUY placed',buyOrder);
+    // % Fark
+    const tdP = document.createElement('td'); tdP.className='mono pctCell';
+    tdP.textContent = fmtPctTR(r.pct, 2);
+    tr.appendChild(tdP);
 
-  setChip(chip,row,'wait');
-  let filled=0; for(let i=0;i<200;i++){ await new Promise(r=>setTimeout(r,900)); const st=await httpGet('/trade/order/status',{symbol:row.symbol,orderId:buy.orderId}); buyOrder.status=st.status; save(); setOpenCount(); renderOpenOrders(); if(st.status==='FILLED'){ filled=parseFloat(st.executedQty); break; } if(['CANCELED','REJECTED','EXPIRED'].includes(st.status)) throw new Error('BUY başarısız: '+st.status); }
-  if(!filled) throw new Error('Zaman aşımı: BUY dolmadı');
-  row.buyFilledQty=floorToStep(filled,row.info.stepSize); hist('BUY FILLED',`${row.symbol} ${fmt(row.buyFilledQty)} @ ${fmt(px)}`);
-
-  setChip(chip,row,'selling'); const sellPx=roundTick(sellSnap,row.info.tickSize);
-  const sell=await httpPost('/trade/order',{symbol:row.symbol,side:'SELL',type:'LIMIT',timeInForce:'GTC',quantity:String(row.buyFilledQty),price:String(sellPx),clientOrderId:'S'+Date.now()});
-  const sellOrder={createdAt:Date.now(),orderId:sell.orderId,symbol:row.symbol,side:'SELL',qty:row.buyFilledQty,price:sellPx,status:sell.status||'NEW'}; S.orders.push(sellOrder); save(); setOpenCount(); renderOpenOrders(); log('info','SELL placed',sellOrder);
-
-  setChip(chip,row,'done'); renderHistory();
-} catch(e){ setChip(chip,row,'error'); log('error','cycle failed: '+e.message); } finally { save(); } }
-
-function startRow(idx, chip){ const row=S.rows[idx]; if(row.running) return; row.running=true; save(); setStatus('Çalışıyor'); const loop=async()=>{ if(!row.running) return; setChip(chip,row,'idle'); await cycle(idx,chip); if(!row.running) return; setTimeout(loop,1200); }; loops.set(idx,true); loop(); }
-function stopRow(idx, chip){ const row=S.rows[idx]; row.running=false; setChip(chip,row,'idle'); save(); loops.delete(idx); if(loops.size===0) setStatus('Hazır'); }
-
-// Açık emirleri periyodik güncelle (ve SELL fill tespiti)
-setInterval(async()=>{ try{ const opened = await httpGet('/trade/openOrders'); const box=el('openOrdersBox'); if(Array.isArray(opened)){ S.orders = mergeOrders(S.orders, opened); save(); setOpenCount(); renderOpenOrders(); } }catch(_){ /* proxy desteklemeyebilir */ } }, 4000);
-
-function mergeOrders(local, remote){ // remote (resmi) veriyi local kayıtlara yedir
-  const map=new Map(local.map(o=>[String(o.orderId)+'_'+o.symbol,o]));
-  for(const r of remote){ const key=String(r.orderId)+'_'+r.symbol; const cur=map.get(key)||{}; map.set(key,{ ...cur, ...r }); }
-  return [...map.values()].sort((a,b)=> (a.updateTime||a.time||0)-(b.updateTime||b.time||0));
+    frag.appendChild(tr);
+  });
+  elBody.innerHTML = '';
+  elBody.appendChild(frag);
 }
 
-// ======================== Paneller ========================
-function renderOpenOrders(){ const box=el('openOrdersBox'); box.innerHTML=''; if(!S.orders.length){ box.innerHTML='<div class="small" style="padding:10px">Açık emir yok</div>'; return; } for(const o of S.orders){ const div=document.createElement('div'); div.className='logline'; div.innerHTML=`<span class='ts'>${new Date(o.time||o.transactTime||o.createdAt||Date.now()).toLocaleTimeString('tr-TR',{hour12:false})}</span> <span class='mono'>${o.symbol}</span> <span class='chip'>${o.side||'-'}</span> <span class='mono'>${fmt(o.origQty||o.qty||o.executedQty||0)} @ ${fmt(o.price||0)}</span> <span class='status'>${o.status||'NEW'}</span> ${o.orderId?`<span class='small'>#${o.orderId}</span>`:''}`; box.appendChild(div); } }
+/* ====== En Yüksek Fark (yalnız OKX bilgisi göster) ====== */
+function updateHighlight(rows){
+  if(!hiOn || UI.hiPos==='hidden'){ elHiWrap.classList.add('hidden'); return; }
+  elHiWrap.classList.remove('hidden');
+  placeHi(UI.hiPos);
 
-async function refreshBalances(){ const box=el('balancesBox'); try{ const acc=await httpGet('/api/account'); const rows=(acc.balances||[]).filter(b=>parseFloat(b.free)>0 || parseFloat(b.locked)>0); if(!rows.length){ box.innerHTML='<div class="small">Hesapta bakiye görünmüyor.</div>'; return; } box.innerHTML = rows.map(b=> `${b.asset}: <span class='mono'>${fmt(b.free)}</span> (free) — <span class='mono'>${fmt(b.locked)}</span> (locked)`).join('<br>'); log('info','Balances updated',{count:rows.length}); }catch(e){ box.innerHTML=`<span class='warnc'>Proxy /api/account desteklemiyor veya Secret eksik.</span>`; log('warn','Balances failed',{error:e.message}); } }
+  if(!rows.length){
+    elHiCoin.textContent='—'; elHiAct.textContent='OKX • —'; elHiPrice.textContent='—'; elHiPct.textContent='—';
+    return;
+  }
+  const r = rows[0];
+  elHiCoin.textContent = r.sym;
+  const act = r.okxAction === 'AL' ? 'AL' : 'SAT';
+  elHiAct.textContent = `OKX • ${act}`;
+  elHiPrice.textContent = `${fmtFixedTR(r.okxPrice, 4)} USDT`;
+  elHiPct.textContent = fmtPctTR(r.pct, 2);
+}
 
-function renderHistory(){ const box=el('historyBox'); box.innerHTML=''; for(const h of S.history){ const div=document.createElement('div'); div.className='logline'; div.innerHTML=`<span class='ts'>${new Date(h.t).toLocaleTimeString('tr-TR',{hour12:false})}</span> <b>${h.type}</b> — ${h.msg} ${h.extra?`<div class='small mono'>${JSON.stringify(h.extra)}</div>`:''}`; box.appendChild(div); } }
+/* ====== Tema ====== */
+function applyTheme(mode){
+  const html = document.documentElement;
+  html.classList.remove('theme-dark','theme-light');
+  html.classList.add(mode==='light' ? 'theme-light' : 'theme-dark');
+  elThemeSel.value = (mode==='light' ? 'light' : 'dark');
+  LS.set('okxbin:theme', (mode==='light' ? 'light' : 'dark'));
+}
 
-function renderLog(){ const box=el('logBox'); box.innerHTML=''; for(const ln of S.logs.slice(-250)){ const div=document.createElement('div'); div.className='logline'; div.innerHTML=`<span class='ts'>${new Date(ln.t).toLocaleTimeString('tr-TR',{hour12:false})}</span> <span class='status'>${ln.type}</span> ${ln.msg} ${ln.data?`<div class='small mono'>${JSON.stringify(ln.data)}</div>`:''}`; box.appendChild(div); } box.scrollTop=box.scrollHeight; }
+/* ====== Kişiselleştirme ====== */
+function applyUI(u){
+  document.documentElement.style.setProperty('--table-font', u.tableFont+'px');
+  document.documentElement.style.setProperty('--cell-pad-y', u.padY+'px');
+  document.documentElement.style.setProperty('--cell-pad-x', u.padX+'px');
+  document.documentElement.style.setProperty('--row-gap', u.rowGap+'px');
+  document.documentElement.style.setProperty('--cell-radius', u.radius+'px');
+  document.documentElement.style.setProperty('--container-max', u.maxW+'px');
+  document.documentElement.style.setProperty('--col-coin', (u.col.coin||28)+'%');
+  document.documentElement.style.setProperty('--col-al',   (u.col.al||27)+'%');
+  document.documentElement.style.setProperty('--col-sat',  (u.col.sat||27)+'%');
+  document.documentElement.style.setProperty('--col-pct',  (u.col.pct||18)+'%');
+  document.documentElement.style.setProperty('--card-font', u.cardFont+'px');
 
-// ======================== İlk yükleme ========================
-function init(){ renderConn(); renderRows(); renderOpenOrders(); renderHistory(); renderLog(); }
-init();
+  // Görsel öğeler
+  $('#btcBox').style.display = u.showBTC ? '' : 'none';
 
-// Butonlar
-el('refreshOpen').onclick = ()=> renderOpenOrders();
-el('refreshBalances').onclick = ()=> refreshBalances();
-el('clearHistory').onclick = ()=>{ S.history=[]; save(); renderHistory(); };
-el('clearLog').onclick = ()=>{ S.logs=[]; save(); renderLog(); };
+  // Konum
+  placeHi(u.hiPos);
 
+  // UI panel etiketleri ve inputlar
+  $('#ui_tableFont_val').textContent = u.tableFont+'px';
+  $('#ui_padY_val').textContent = u.padY+'px';
+  $('#ui_padX_val').textContent = u.padX+'px';
+  $('#ui_rowGap_val').textContent = u.rowGap+'px';
+  $('#ui_radius_val').textContent = u.radius+'px';
+  $('#ui_maxW_val').textContent = u.maxW+'px';
+  $('#ui_cardFont_val').textContent = u.cardFont+'px';
+
+  $('#ui_tableFont').value = u.tableFont;
+  $('#ui_padY').value = u.padY;
+  $('#ui_padX').value = u.padX;
+  $('#ui_rowGap').value = u.rowGap;
+  $('#ui_radius').value = u.radius;
+  $('#ui_maxW').value = u.maxW;
+  $('#ui_cardFont').value = u.cardFont;
+  $('#ui_colCoin').value = u.col.coin;
+  $('#ui_colAl').value = u.col.al;
+  $('#ui_colSat').value = u.col.sat;
+  $('#ui_colPct').value = u.col.pct;
+  $('#ui_hiPos').value = u.hiPos;
+  $('#ui_showBTC').checked = !!u.showBTC;
+
+  const sum = (+u.col.coin)+(+u.col.al)+(+u.col.sat)+(+u.col.pct);
+  const ok = Math.round(sum)===100;
+  $('#ui_colSum').textContent = 'Toplam: '+sum.toFixed(0)+'% ' + (ok?'✓':'(100 olmalı — otomatik normalize edilir)');
+}
+function saveUI(){ LS.set('okxbin:UI', UI); }
+function normalizeCols(){
+  let {coin,al,sat,pct} = UI.col;
+  let sum = coin+al+sat+pct;
+  if(sum<=0) { UI.col={coin:28,al:27,sat:27,pct:18}; return; }
+  UI.col.coin = +(coin*100/sum).toFixed(0);
+  UI.col.al   = +(al*100/sum).toFixed(0);
+  UI.col.sat  = +(sat*100/sum).toFixed(0);
+  UI.col.pct  = 100 - UI.col.coin - UI.col.al - UI.col.sat;
+}
+function placeHi(pos){
+  const wrap = elHiWrap;
+  if(pos==='hidden'){ wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+  if(pos==='top')              $('#anchorTop').after(wrap);
+  else if(pos==='afterControls') $('#anchorAfterControls').after(wrap);
+  else if(pos==='afterTable')    $('#anchorAfterTable').after(wrap);
+}
+
+/* ====== UI / Kontroller (kalıcı) ====== */
+function renderChips(){
+  const wrap = $('#chips'); wrap.innerHTML='';
+  Array.from(watched).sort().forEach(sym=>{
+    const d = document.createElement('div'); d.className='chip';
+    d.innerHTML = `<span>${sym}</span>`;
+    const b = document.createElement('button'); b.textContent='×';
+    b.onclick = ()=>{
+      watched.delete(sym);
+      LS.set('okxbin:watched', Array.from(watched));
+      elCnt.textContent = watched.size; renderChips();
+    };
+    d.appendChild(b); wrap.appendChild(d);
+  });
+  elCnt.textContent = watched.size;
+}
+function schedule(ms){
+  refreshMs = Math.max(100, Math.min(4000, ms|0));
+  elRng.value = refreshMs;
+  elRngLbl.textContent = (refreshMs/1000).toFixed(1)+' sn';
+  LS.set('okxbin:interval', refreshMs);
+  if(timer) clearInterval(timer);
+  timer = setInterval(tick, refreshMs);
+}
+
+/* ====== Eventler ====== */
+$('#add').onclick = ()=>{
+  const raw = $('#coinIn').value;
+  const sym = norm(raw);
+  if(sym){
+    watched.add(sym);
+    LS.set('okxbin:watched', Array.from(watched));
+    renderChips();
+  }
+  $('#coinIn').value='';
+};
+$('#coinIn').addEventListener('keydown',(e)=>{ if(e.key==='Enter') $('#add').click(); });
+
+$('#clear').onclick = ()=>{
+  watched.clear();
+  LS.set('okxbin:watched', []);
+  renderChips(); elBody.innerHTML='';
+};
+
+elRng.addEventListener('input', e=> schedule(Number(e.target.value)));
+elMin.addEventListener('input', e=>{
+  minPctFilter = Number(e.target.value)||0;
+  LS.set('okxbin:minpct', minPctFilter);
+});
+$('#themeSel').addEventListener('change', (e)=> applyTheme(e.target.value));
+
+elHiToggle.addEventListener('click', ()=>{
+  hiOn = !hiOn;
+  LS.set('okxbin:hiOn', hiOn);
+  elHiToggle.textContent = 'En Yüksek Fark: ' + (hiOn ? 'Açık' : 'Kapalı');
+  updateHighlight([]); // anlık uygula
+});
+elCustomToggle.addEventListener('click', ()=>{
+  const open = elCustomWrap.classList.toggle('hidden');
+  elCustomToggle.textContent = 'Kişiselleştir: ' + (open ? 'Kapalı' : 'Açık');
+});
+
+/* Kişiselleştirme inputları */
+$('#ui_tableFont').oninput = (e)=>{ UI.tableFont=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_padY').oninput = (e)=>{ UI.padY=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_padX').oninput = (e)=>{ UI.padX=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_rowGap').oninput = (e)=>{ UI.rowGap=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_radius').oninput = (e)=>{ UI.radius=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_maxW').oninput = (e)=>{ UI.maxW=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_cardFont').oninput = (e)=>{ UI.cardFont=+e.target.value; applyUI(UI); saveUI(); };
+$('#ui_hiPos').onchange = (e)=>{ UI.hiPos=e.target.value; applyUI(UI); saveUI(); };
+$('#ui_showBTC').onchange = (e)=>{ UI.showBTC=e.target.checked; applyUI(UI); saveUI(); };
+['ui_colCoin','ui_colAl','ui_colSat','ui_colPct'].forEach(id=>{
+  $('#'+id).addEventListener('input',(e)=>{
+    const v = Math.max(10, Math.min(60, +e.target.value||0));
+    if(id==='ui_colCoin') UI.col.coin=v;
+    if(id==='ui_colAl')   UI.col.al=v;
+    if(id==='ui_colSat')  UI.col.sat=v;
+    if(id==='ui_colPct')  UI.col.pct=v;
+    normalizeCols();
+    applyUI(UI); saveUI();
+  });
+});
+$('#ui_reset').onclick = ()=>{
+  UI = JSON.parse(JSON.stringify(UI_DEFAULTS));
+  applyUI(UI); saveUI();
+};
+
+/* ====== Başlat ====== */
+(function initFromStorage(){
+  applyTheme(themeMode);
+  renderChips();
+  applyUI(UI);
+  elMin.value = isFinite(minPctFilter)? minPctFilter : 0.00;
+  elHiToggle.textContent = 'En Yüksek Fark: ' + (hiOn ? 'Açık' : 'Kapalı');
+  schedule(isFinite(refreshMs) ? refreshMs : 1000);
+  elLast.textContent = nowStr();
+})();
+setInterval(()=>{ if(watched.size===0) elLast.textContent = nowStr(); }, 1000);
+
+/* ====== Döngü ====== */
+async function tick(){ /* tanım yukarıda */ } // placer
+// Gerçek tick tanımı yukarıda; setInterval schedule() onu çağırıyor.
 </script>
 </body>
 </html>
