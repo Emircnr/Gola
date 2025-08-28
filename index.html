@@ -3,531 +3,593 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Binance L-Seviye Bot — Tek Dosya</title>
+<title>Binance L-Rank Maker Bot — Tek Dosya (UI + Mantık)</title>
 <style>
 :root{
-  --bg:#0b1220; --panel:#101826; --text:#e6edf6; --muted:#9fb0ca; --br:#1d2a48;
-  --good:#22c55e; --warn:#f59e0b; --bad:#ef4444; --accent:#60a5fa;
+  --bg:#0b1220; --panel:#111a2b; --panel2:#0f1626; --text:#e6edf6; --muted:#9fb0ca;
+  --good:#22c55e; --warn:#f59e0b; --bad:#ef4444; --accent:#60a5fa; --card:#101828;
+  --shadow:0 10px 30px rgba(0,0,0,.35);
 }
 *{box-sizing:border-box}
-html,body{height:100%;margin:0;background:linear-gradient(180deg,#0f172a,#0b1220);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
-a{color:var(--accent)}
-#app{min-height:100%;display:grid;grid-template-rows:auto auto auto 1fr auto}
-header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--br);position:sticky;top:0;background:linear-gradient(180deg,#0f172a,#0b1220);z-index:5}
-header h1{margin:0;font-size:18px}
-.badge{font-size:12px;padding:5px 8px;border-radius:999px;background:#13203a;border:1px solid var(--br);color:#bed0f2}
-.panel{margin:10px 14px;padding:12px;border:1px solid var(--br);border-radius:16px;background:linear-gradient(180deg,#101828,#0f1626)}
-.panel h2{margin:0 0 8px 0;font-size:15px}
+html,body{height:100%;margin:0;background:linear-gradient(180deg,#0e172a,#0b1220);color:var(--text);font-family:Inter,system-ui,Segoe UI,Roboto,Arial}
+a{color:var(--accent);text-decoration:none}
+#app{min-height:100%;display:grid;grid-template-rows:auto auto 1fr auto}
+header{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px 16px;background:linear-gradient(180deg,#0e172a,#0b1220);border-bottom:1px solid #162036;position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:18px;font-weight:600;letter-spacing:.2px}
+.badge{font-size:12px;padding:4px 8px;border-radius:999px;background:#19223a;color:#a9bbd9;border:1px solid #223259}
 .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-input,select{padding:8px;border-radius:10px;border:1px solid var(--br);background:#0b1324;color:#e6edf6}
-.btn{border:0;border-radius:12px;padding:9px 12px;color:#fff;background:#1f2937;cursor:pointer;font-weight:600}
-.btn.good{background:#1d5b2d}.btn.bad{background:#8b2b2b}.btn.blue{background:#1c4ed8}.btn.gray{background:#3b4452}
+.btn{appearance:none;border:0;border-radius:12px;padding:10px 14px;color:#fff;background:linear-gradient(180deg,#1a73e8,#1356b7);cursor:pointer;font-weight:600;box-shadow:var(--shadow);transition:transform .05s ease}
+.btn:active{transform:translateY(1px)}
+.btn.sec{background:#1f2937}
+.btn.good{background:linear-gradient(180deg,#22c55e,#17984a)}
+.btn.warn{background:linear-gradient(180deg,#f59e0b,#c07b08)}
+.btn.bad{background:linear-gradient(180deg,#ef4444,#b03030)}
 .btn.small{padding:6px 10px;border-radius:10px;font-size:12px}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px;margin:10px 14px}
-.card{padding:12px;border:1px solid var(--br);border-radius:16px;background:linear-gradient(180deg,#101828,#0f1626);display:flex;flex-direction:column;gap:10px}
-.card h3{margin:0;font-size:16px;display:flex;justify-content:space-between;align-items:center}
+.switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+.switch input{display:none}
+.switch .track{width:44px;height:24px;border-radius:999px;background:#1f2937;position:relative;border:1px solid #2b3b57}
+.switch .thumb{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:#e6edf6;transition:left .15s}
+.switch input:checked + .track .thumb{left:22px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding:14px}
+.card{background:linear-gradient(180deg,#111a2b,#0f1626);border:1px solid #1a2540;border-radius:16px;box-shadow:var(--shadow);padding:12px;display:flex;flex-direction:column;gap:10px}
+.card h3{margin:0;font-size:15px;display:flex;align-items:center;justify-content:space-between}
 .kv{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.kv .it{background:#0e1628;border:1px solid var(--br);border-radius:12px;padding:8px}
-.kv label{display:block;font-size:11px;color:#9fb0ca;margin-bottom:4px}
+.kv .item{background:#0e1628;border:1px solid #1a2540;border-radius:12px;padding:8px}
+.kv .item label{display:block;font-size:11px;color:#9fb0ca;margin-bottom:4px}
+.kv .item input,.kv .item select{width:100%;padding:8px;border-radius:10px;border:1px solid #223259;background:#0b1322;color:#e6edf6}
 .depth{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.depth-col{background:#0e1628;border:1px solid var(--br);border-radius:12px;padding:8px}
+.depth-col{background:#0e1628;border:1px solid #1a2540;border-radius:12px;padding:8px}
 .depth h4{margin:0 0 6px 0;font-size:12px;color:#9fb0ca}
-.dlist{display:flex;flex-direction:column;gap:4px;font-family:ui-monospace,Consolas,Menlo,monospace}
-.drow{display:flex;justify-content:space-between;padding:4px 6px;border-radius:8px}
-.drow.bid{background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.25)}
-.drow.ask{background:rgba(239,68,68,.10);border:1px solid rgba(239,68,68,.25)}
-.small{font-size:12px;color:#9fb0ca}
-.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
-.stat{background:#0e1628;border:1px solid var(--br);border-radius:14px;padding:10px}
-.stat h4{margin:0 0 6px 0;font-size:12px;color:#9fb0ca}
-.stat .v{font-size:18px;font-weight:700}
-.table{width:100%;border-collapse:collapse}
-.table th,.table td{border-bottom:1px dashed #1e2b47;padding:6px 8px;text-align:left;font-size:12px}
-#log{margin:0 14px 14px 14px}
-.logbox{background:#0b1324;border:1px solid var(--br);border-radius:14px;min-height:120px;max-height:260px;overflow:auto;padding:10px;font-family:ui-monospace,Consolas,Menlo,monospace}
-.l{padding:4px 0;border-bottom:1px dashed #213055}
-footer{padding:10px 14px;border-top:1px solid var(--br);color:#9fb0ca}
-.empty{opacity:.85;text-align:center;padding:20px;border:2px dashed var(--br);border-radius:16px;margin:10px 14px}
-.tag{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid var(--br);background:#0b1324;color:#a9bbd9}
-.warn{border:1px solid #614c22;background:#2b2212;color:#f7e4b5;border-radius:12px;padding:10px}
+.depth-list{display:flex;flex-direction:column;gap:4px;font-family:ui-monospace,Consolas,Menlo,monospace}
+.rowline{display:flex;justify-content:space-between;padding:4px 6px;border-radius:8px}
+.rowline.bid{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2)}
+.rowline.ask{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2)}
+.state{display:flex;gap:8px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%}
+.dot.green{background:var(--good)} .dot.yellow{background:var(--warn)} .dot.red{background:var(--bad)} .dot.gray{background:#475569}
+hr.sep{border:none;border-top:1px dashed #203055;margin:4px 0}
+#tools{padding:10px 14px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;border-bottom:1px solid #162036;background:linear-gradient(180deg,#0e172a,#0b1220)}
+.panel{background:linear-gradient(180deg,#101828,#0f1626);border:1px solid #1a2540;border-radius:16px;padding:10px;box-shadow:var(--shadow)}
+.panel h2{margin:0 0 8px 0;font-size:14px;font-weight:700;color:#bcd1ef}
+.panel .row{gap:8px}
+.panel input, .panel select{padding:8px;border-radius:10px;border:1px solid #223259;background:#0b1322;color:#e6edf6}
+.tag{font-size:11px;padding:4px 8px;border-radius:999px;border:1px solid #223259;background:#0b1322;color:#a9bbd9}
+#log{padding:10px 14px}
+.logbox{background:#0b1322;border:1px solid #223259;border-radius:14px;min-height:120px;max-height:260px;overflow:auto;padding:10px;font-family:ui-monospace,Consolas,Menlo,monospace}
+.logbox .l{padding:4px 0;border-bottom:1px dashed #223259}
+footer{padding:10px 14px;color:#91a6c4;border-top:1px solid #162036}
+.empty{opacity:.8;text-align:center;padding:20px;border:2px dashed #223259;border-radius:16px}
+.help{color:#9fb0ca;font-size:12px}
+.smallmuted{font-size:11px;color:#9fb0ca}
 </style>
 </head>
 <body>
 <div id="app">
   <header>
     <div class="row">
-      <h1>Binance L-Seviye Bot</h1>
-      <span id="authTag" class="badge">Auth: —</span>
+      <h1>Binance L-Rank Maker Bot</h1>
+      <span id="modeTag" class="badge">Mode: probing…</span>
       <span id="wsTag" class="badge">WS: —</span>
-      <span id="proxyTag" class="badge">Proxy: —</span>
+      <span id="backendTag" class="badge">Backend: —</span>
     </div>
     <div class="row">
-      <button class="btn good" id="startAll">Hepsini Başlat</button>
-      <button class="btn bad" id="stopAll">Hepsini Durdur</button>
+      <button class="btn good" id="btnStartAll">Hepsini Başlat</button>
+      <button class="btn bad" id="btnStopAll">Hepsini Durdur</button>
     </div>
   </header>
 
-  <!-- Anahtar & Proxy -->
-  <section class="panel">
-    <h2>API & Proxy Ayarları</h2>
-    <div class="warn">
-      <b>Not:</b> Tarayıcılar doğrudan Binance REST’e izin vermez (CORS). Buraya gireceğin <b>Proxy URL</b> (Cloudflare Worker veya yerel Node proxy) üzerinden çağrı yapılır.<br/>
-      <b>Secret Key</b> sadece tarayıcında imzalama için kullanılır, ağa gönderilmez. Bilgiler <b>yalnız bu cihazda</b> saklanır.
-    </div>
-    <div class="row">
-      <input id="apiKey" placeholder="API Key (mainnet)" style="min-width:260px">
-      <input id="secKey" placeholder="Secret Key" style="min-width:260px">
-      <input id="proxyUrl" placeholder="Proxy URL (örn. https://senin-worker.workers.dev veya http://localhost:8787)" style="min-width:360px">
-      <label class="row" style="gap:6px"><input type="checkbox" id="remember"> <span class="small">Bu tarayıcıda sakla</span></label>
-      <button class="btn blue" id="btnConnect">Bağlan & Doğrula</button>
-      <button class="btn gray" id="btnClearKeys">Anahtarları Temizle</button>
-    </div>
-  </section>
+  <section id="tools">
+    <div class="panel">
+      <h2>Genel Ayarlar</h2>
+      <div class="row">
+        <label class="switch">
+          <input id="toggleTestnet" type="checkbox">
+          <div class="track"><div class="thumb"></div></div>
+        </label>
+        <span class="tag">Testnet</span>
 
-  <!-- İstatistik / PnL -->
-  <section class="panel">
-    <h2>Portföy & PnL</h2>
-    <div class="row statgrid">
-      <div class="stat"><h4>Gerçekleşen PnL (Toplam)</h4><div class="v" id="pnlTotal">0.000000</div></div>
-      <div class="stat"><h4>Bugün Gerçekleşen PnL</h4><div class="v" id="pnlToday">0.000000</div></div>
-      <div class="stat"><h4>Ücret (bps)</h4>
-        <div class="row"><input id="feeBps" type="number" step="0.1" value="10" style="width:100px"><span class="tag">10 bps = %0.10</span></div>
+        <label class="switch">
+          <input id="toggleLive" type="checkbox">
+          <div class="track"><div class="thumb"></div></div>
+        </label>
+        <span class="tag">Live (Backend)</span>
+
+        <input id="backendUrl" placeholder="Backend URL (örn. http://localhost:8787)" style="min-width:280px"/>
+        <button class="btn sec small" id="btnProbe">Bağlantıyı Kontrol Et</button>
+        <span class="help">Backend yoksa otomatik **Paper Mode** çalışır.</span>
       </div>
-      <div class="stat"><h4>Toplam İşlem</h4><div class="v" id="tradeCount">0</div></div>
+    </div>
+
+    <div class="panel">
+      <h2>Yeni Coin Ekle</h2>
+      <div class="row">
+        <input id="sym" placeholder="Sembol (örn. DYM)" style="width:110px"/>
+        <select id="quote"><option>USDT</option><option>BUSD</option><option>BTC</option><option>ETH</option></select>
+        <select id="buyL"></select>
+        <select id="sellL"></select>
+        <select id="qtyMode">
+          <option value="quote">USDT Tutarı</option>
+          <option value="base">Adet (Qty)</option>
+        </select>
+        <input id="qty" type="number" step="0.0001" min="0" placeholder="Miktar"/>
+        <input id="ttl" type="number" step="1" min="3" value="30" title="TTL sn" style="width:90px" />
+        <label class="switch">
+          <input id="toggleChase" type="checkbox" checked>
+          <div class="track"><div class="thumb"></div></div>
+        </label><span class="tag">Chase</span>
+        <input id="slip" type="number" step="0.01" value="0.2" style="width:90px" title="Maks. slipaj %"/>
+        <button class="btn" id="btnAdd">Ekle</button>
+      </div>
+      <div class="smallmuted">L: 1 en iyi seviye. Örn: Alım L2, Satış L3.</div>
     </div>
   </section>
 
-  <!-- Coin Ekle -->
-  <section class="panel">
-    <h2>Yeni Coin Ekle</h2>
-    <div class="row">
-      <input id="sym" placeholder="Sembol (örn. DYM)" style="width:120px">
-      <select id="quote"><option>USDT</option><option>BTC</option><option>ETH</option></select>
-      <select id="buyL"></select>
-      <select id="sellL"></select>
-      <select id="qmode">
-        <option value="quote" selected>USDT Tutarı</option>
-        <option value="base">Adet (Qty)</option>
-      </select>
-      <input id="qty" type="number" step="0.0001" placeholder="Miktar">
-      <input id="ttl" type="number" min="3" value="20" title="TTL sn" style="width:90px">
-      <input id="slip" type="number" step="0.01" value="0.25" title="Maks. slipaj %" style="width:120px">
-      <label class="row" style="gap:6px"><input type="checkbox" id="chase" checked> <span class="small">Chase (yeniden konumla)</span></label>
-      <button class="btn" id="add">Ekle</button>
-    </div>
-    <div class="small">L1 en iyi seviye. Örn: Alım L2, Satış L3.</div>
-  </section>
-
-  <!-- Bot Kartları -->
   <section id="cards" class="grid">
     <div id="empty" class="empty">Henüz coin eklenmedi. Yukarıdan sembol girip <b>Ekle</b>’ye tıklayın (örn. DYM/USDT).</div>
   </section>
 
-  <!-- İşlem Geçmişi -->
-  <section class="panel">
-    <h2>İşlem Geçmişi</h2>
-    <div class="row" style="justify-content:space-between">
-      <span class="small">Kapanan işlemler burada tutulur (yerel). CSV olarak indirebilirsin.</span>
-      <div class="row">
-        <button class="btn small gray" id="btnExportCsv">CSV İndir</button>
-        <button class="btn small bad" id="btnClearTrades">Geçmişi Temizle</button>
-      </div>
-    </div>
-    <div style="overflow:auto">
-      <table class="table" id="tradeTable">
-        <thead><tr>
-          <th>Zaman</th><th>Sembol</th><th>Qty</th><th>Alış</th><th>Satış</th><th>Ücret</th><th>PnL</th><th>PnL %</th>
-        </tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- Loglar -->
   <section id="log">
     <div class="row" style="justify-content:space-between">
-      <div class="row"><h2 style="margin:0;font-size:15px">Canlı Log</h2><span class="small">— Emirler, iptaller, durumlar</span></div>
-      <button class="btn small gray" id="btnClearLog">Logu Temizle</button>
+      <div class="row">
+        <h2 style="margin:0;font-size:15px">Canlı Log</h2>
+        <span class="smallmuted">— Emirler, iptaller, durumlar burada.</span>
+      </div>
+      <button class="btn sec small" id="btnClearLog">Logu Temizle</button>
     </div>
     <div id="logbox" class="logbox"></div>
   </section>
 
   <footer>
-    Strateji: seçili <b>Alım L#</b> ve <b>Satış L#</b> seviyelerine LIMIT emir. TTL, Slipaj ve Chase korumaları vardır.
+    Bu UI, gerçek işlem anahtarlarını <b>asla</b> istemez. Live mod için yerel backend kullanır; yoksa Paper mod çalışır. Strateji: seçili <b>Alım L#</b> ve <b>Satış L#</b> seviyeleri.
   </footer>
 </div>
 
 <script>
-/*** ===== Yardımcılar / Depo ===== ***/
-const $ = s => document.querySelector(s);
-const now = ()=>Date.now();
-const fmtTime = ts => new Date(ts).toLocaleString();
-function saveLS(k,v){ localStorage.setItem(k, JSON.stringify(v)); }
-function loadLS(k,d=null){ try{ const x=localStorage.getItem(k); return x?JSON.parse(x):d }catch{ return d }}
+/*** ======= Yardımcılar ======= ***/
+const $ = sel => document.querySelector(sel);
+const el = (tag,cls,txt) => { const e=document.createElement(tag); if(cls) e.className=cls; if(txt) e.textContent=txt; return e; }
+const now = () => Date.now();
+const f2 = n => Number(n).toFixed(2);
+function log(msg, level="info"){ 
+  const box = $("#logbox"); 
+  const line = el('div','l'); 
+  const ts = new Date().toLocaleTimeString(); 
+  line.innerHTML = `<span style="color:#9fb0ca">${ts}</span> — ${msg}`;
+  box.appendChild(line); 
+  box.scrollTop = box.scrollHeight;
+}
+function saveLS(key, val){ localStorage.setItem(key, JSON.stringify(val)); }
+function loadLS(key, def=null){ try{ const v=localStorage.getItem(key); return v?JSON.parse(v):def }catch{ return def } }
 
-/*** ===== Log ===== ***/
-const logBox = document.createElement('div'); // init aşağıda atanacak
-function log(msg){
-  const box = document.getElementById('logbox');
-  const l = document.createElement('div'); l.className='l';
-  const ts = new Date().toLocaleTimeString();
-  l.innerHTML = `<span style="color:#9fb0ca">${ts}</span> — ${msg}`;
-  box.appendChild(l); box.scrollTop = box.scrollHeight;
-}
-
-/*** ===== WebCrypto HMAC (Secret tarayıcıda kalır) ===== ***/
-let SECRET_RAW = '';
-async function hmacHex(secret, message){
-  const enc = new TextEncoder();
-  const key = await crypto.subtle.importKey("raw", enc.encode(secret), {name:"HMAC", hash:"SHA-256"}, false, ["sign"]);
-  const sig = await crypto.subtle.sign("HMAC", key, enc.encode(message));
-  return [...new Uint8Array(sig)].map(b=>b.toString(16).padStart(2,'0')).join('');
-}
-
-/*** ===== Proxy (Cloudflare/Local) — REST köprüsü ===== ***/
-let API_KEY = '', PROXY = '';
-async function proxyForward({method="GET", path="/api/v3/time", queryObj={}, signed=false}){
-  const q = new URLSearchParams(queryObj);
-  if(signed){
-    q.set("timestamp", Date.now());
-    if(!q.get("recvWindow")) q.set("recvWindow", "5000");
-    const sig = await hmacHex(SECRET_RAW, q.toString());
-    q.set("signature", sig);
-  }
-  const url = PROXY.replace(/\/$/,'') + `/proxy?method=${encodeURIComponent(method)}&path=${encodeURIComponent(path)}&` + q.toString();
-  const r = await fetch(url, { headers: { "X-API-KEY": API_KEY }});
-  const text = await r.text();
-  try{ return {ok:r.ok, data: JSON.parse(text)} } catch { return {ok:r.ok, data:text} }
-}
-
-/*** ===== Auth test ===== ***/
-async function checkAuth(){
-  const r = await proxyForward({method:"GET", path:"/api/v3/account", signed:true});
-  if(r.ok){ $("#authTag").textContent="Auth: OK"; return true; }
-  $("#authTag").textContent="Auth: HATA"; log(`Auth hata: ${r.data?.code||''} ${r.data?.msg||r.data}`); return false;
-}
-
-/*** ===== Exchange Info ===== ***/
-const ExInfo = {};
-async function getEx(symbol){
-  if(ExInfo[symbol]) return ExInfo[symbol];
-  const r = await proxyForward({method:"GET", path:"/api/v3/exchangeInfo", queryObj:{symbol}});
-  if(!r.ok){ log(`${symbol} exchangeInfo alınamadı: ${JSON.stringify(r.data)}`); throw new Error("exchangeInfo"); }
-  const info = r.data.symbols?.[0]; const f={}; for(const x of info.filters) f[x.filterType]=x;
-  const o = { tickSize:Number(f.PRICE_FILTER?.tickSize||0.0001), stepSize:Number(f.LOT_SIZE?.stepSize||0.001), minNotional:Number(f.MIN_NOTIONAL?.minNotional||10) };
-  ExInfo[symbol]=o; return o;
-}
-const roundPrice=(p,t)=>Number((Math.round(p/t)*t).toFixed(12));
-const floorQty=(q,s)=>Number((Math.floor(q/s)*s).toFixed(12));
-
-/*** ===== REST Emir Fonksiyonları ===== ***/
-async function placeOrder({symbol, side, price, quantity}){
-  const queryObj = { symbol, side, type:"LIMIT", timeInForce:"GTC", price:String(price), quantity:String(quantity) };
-  const r = await proxyForward({method:"POST", path:"/api/v3/order", queryObj, signed:true});
-  if(!r.ok) throw new Error(JSON.stringify(r.data));
-  return r.data;
-}
-async function cancelOrder({symbol, orderId}){
-  const q = { symbol, orderId:String(orderId) };
-  const r = await proxyForward({method:"DELETE", path:"/api/v3/order", queryObj:q, signed:true});
-  if(!r.ok) throw new Error(JSON.stringify(r.data));
-  return r.data;
-}
-async function getOrder({symbol, orderId}){
-  const q = { symbol, orderId:String(orderId) };
-  const r = await proxyForward({method:"GET", path:"/api/v3/order", queryObj:q, signed:true});
-  if(!r.ok) throw new Error(JSON.stringify(r.data));
-  return r.data;
-}
-
-/*** ===== TradeBook: PnL & Geçmiş ===== ***/
-const TradeBook = {
-  key:'trades_v1',
-  data: loadLS('trades_v1', []),
-  feeBps: Number(loadLS('fee_bps', 10)),
-  add(t){ this.data.push(t); saveLS(this.key, this.data); this.render(); },
-  clear(){ this.data=[]; saveLS(this.key, this.data); this.render(); },
-  render(){
-    $("#feeBps").value = this.feeBps;
-    const tb = $("#tradeTable tbody"); tb.innerHTML='';
-    let total=0, today=0; const todayStr=new Date().toISOString().slice(0,10);
-    for(const t of this.data){
-      total+=t.pnl; if(t.time.slice(0,10)===todayStr) today+=t.pnl;
-      const tr=document.createElement('tr');
-      tr.innerHTML=`<td>${t.time}</td><td>${t.symbol}</td><td>${t.qty.toFixed(6)}</td>
-        <td>${t.buyPrice.toFixed(6)}</td><td>${t.sellPrice.toFixed(6)}</td>
-        <td>${t.fee.toFixed(6)}</td><td>${t.pnl.toFixed(6)}</td><td>${(t.pnlPct*100).toFixed(3)}%</td>`;
-      tb.appendChild(tr);
-    }
-    $("#pnlTotal").textContent=total.toFixed(6);
-    $("#pnlToday").textContent=today.toFixed(6);
-    $("#tradeCount").textContent=String(this.data.length);
+/*** ======= Global Durum ======= ***/
+const App = {
+  testnet: loadLS('testnet', false),
+  live: loadLS('live', false),
+  backendUrl: loadLS('backendUrl','http://localhost:8787'),
+  wsOk: false,
+  backendOk: false,
+  mode(){ return (this.live && this.backendOk) ? 'LIVE' : 'PAPER' },
+  bots: {}, // symbol -> CoinBot
+  addBot(cfg){
+    const s = (cfg.symbol || '').toUpperCase();
+    if(this.bots[s]) return alert(s+' zaten ekli');
+    this.bots[s] = new CoinBot(cfg);
+    $("#empty")?.remove();
   },
-  exportCsv(){
-    const rows=[["time","symbol","qty","buyPrice","sellPrice","fee","pnl","pnlPct"]];
-    for(const t of this.data) rows.push([t.time,t.symbol,t.qty,t.buyPrice,t.sellPrice,t.fee,t.pnl,t.pnlPct]);
-    const csv=rows.map(r=>r.join(",")).join("\n");
-    const blob=new Blob([csv],{type:"text/csv"}); const a=document.createElement('a');
-    a.href=URL.createObjectURL(blob); a.download="trades.csv"; a.click();
-  }
+  startAll(){ Object.values(this.bots).forEach(b=>b.start()); },
+  stopAll(){ Object.values(this.bots).forEach(b=>b.stop()); },
 };
 
-/*** ===== WS (Derinlik) ===== ***/
-const wsUrl = sym => `wss://stream.binance.com:9443/ws/${sym.toLowerCase()}@depth5@100ms`;
+/*** ======= Borsa Yardımcıları ======= ***/
+function wsBase(testnet){ return testnet ? 'wss://testnet.binance.vision/ws' : 'wss://stream.binance.com:9443/ws'; }
+function restBase(testnet){ return testnet ? 'https://testnet.binance.vision' : 'https://api.binance.com'; }
 
-/*** ===== Bot Sınıfı ===== ***/
+/** ExchangeInfo: lot/price/minNotional çek **/ 
+const ExInfoCache = {};
+async function getExchangeInfo(symbol){
+  if(ExInfoCache[symbol]) return ExInfoCache[symbol];
+  try{
+    const r = await fetch(`${restBase(App.testnet)}/api/v3/exchangeInfo?symbol=${symbol}`);
+    const j = await r.json();
+    const info = j.symbols?.[0];
+    if(!info) throw new Error('info yok');
+    const filters = {};
+    for(const f of info.filters){ filters[f.filterType]=f; }
+    const res = {
+      symbol: info.symbol,
+      tickSize: Number(filters.PRICE_FILTER?.tickSize || 0.0001),
+      stepSize: Number(filters.LOT_SIZE?.stepSize || 0.001),
+      minNotional: Number(filters.MIN_NOTIONAL?.minNotional || 10)
+    };
+    ExInfoCache[symbol]=res; 
+    return res;
+  }catch(e){
+    log(`exchangeInfo alınamadı (${symbol}), varsayılanlar kullanılacak`, 'warn');
+    return {symbol, tickSize:0.0001, stepSize:0.001, minNotional:10};
+  }
+}
+function roundTo(v, step){ return Math.floor(Number(v)/step)*step; }
+function roundPrice(p, tick){ return Math.round(Number(p)/tick)*tick; }
+function roundQty(q, step){ return Math.floor(Number(q)/step)*step; }
+
+/*** ======= Backend Arayüzü (opsiyonel) ======= ***/
+async function backendProbe(){
+  const url = App.backendUrl.replace(/\/$/,'');
+  try{
+    const r = await fetch(url+'/ping', {method:'GET'});
+    App.backendOk = r.ok;
+    $('#backendTag').textContent = `Backend: ${App.backendOk?'OK':'YOK'}`;
+  }catch(e){
+    App.backendOk = false;
+    $('#backendTag').textContent = 'Backend: YOK';
+  }
+  $('#modeTag').textContent = `Mode: ${App.mode()}`;
+  saveLS('backendUrl', App.backendUrl);
+  saveLS('live', App.live);
+  saveLS('testnet', App.testnet);
+}
+async function sendOrderLive(payload){
+  // payload: {symbol, side, type, price, quantity, timeInForce}
+  const url = App.backendUrl.replace(/\/$/,'') + '/order';
+  const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)});
+  if(!r.ok) throw new Error('Backend order hatası');
+  return r.json();
+}
+async function cancelLive(symbol, orderId){
+  const url = App.backendUrl.replace(/\/$/,'') + '/cancel';
+  const r = await fetch(url, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({symbol, orderId})});
+  if(!r.ok) throw new Error('Backend cancel hatası');
+  return r.json();
+}
+
+/*** ======= Coin Bot Sınıfı ======= ***/
 class CoinBot{
   constructor(cfg){
-    this.symbol=cfg.symbol;
-    this.buyL=cfg.buyL??2; this.sellL=cfg.sellL??3;
-    this.qtyMode=cfg.qtyMode||'quote'; this.qty=Number(cfg.qty||10);
-    this.ttl=Number(cfg.ttl||20); this.slip=Number(cfg.slip||0.25); this.chase=!!cfg.chase;
+    this.symbol = cfg.symbol.toUpperCase();
+    this.buyL = cfg.buyL ?? 2;
+    this.sellL = cfg.sellL ?? 3;
+    this.qtyMode = cfg.qtyMode || 'quote'; // 'quote' USDT, 'base' qty
+    this.qty = Number(cfg.qty || 10);
+    this.ttl = Number(cfg.ttl || 30);
+    this.chase = !!cfg.chase;
+    this.slip = Number(cfg.slip || 0.2); // %
+    this.state = 'IDLE';  // IDLE | BUYING | SELLING | HOLD
+    this.position = 0;    // base qty
+    this.avgCost = 0;
+    this.ws = null;
+    this.depth = {bids:[], asks:[]}; // [[price,qty],...]
+    this.lastTick = 0;
+    this.timer = null;
+    this.openOrder = null; // {side,price,qty,time, id?}
+    this.exInfo = null;
 
-    this.depth={bids:[],asks:[]}; this.ex=null; this.ws=null; this.timer=null;
-    this.position=0; this.avgCost=0; this.openOrder=null; // {id,side,price,qty,t0}
-
-    this.buildCard(); this.connectWS(); getEx(this.symbol).then(x=>this.ex=x);
+    this.buildCard();
+    this.save();
+    this.connect();
+    getExchangeInfo(this.symbol).then(info=>this.exInfo=info);
   }
+  save(){
+    const key = 'bots';
+    const cur = loadLS(key, {});
+    cur[this.symbol] = {
+      symbol:this.symbol,buyL:this.buyL,sellL:this.sellL,qtyMode:this.qtyMode,qty:this.qty,ttl:this.ttl,chase:this.chase,slip:this.slip
+    };
+    saveLS(key, cur);
+  }
+  removeFromStore(){
+    const cur = loadLS('bots', {});
+    delete cur[this.symbol];
+    saveLS('bots', cur);
+  }
+
   buildCard(){
-    const wrap=document.createElement('div'); wrap.className='card'; wrap.id=`card-${this.symbol}`;
-    wrap.innerHTML=`
-      <h3><span>${this.symbol}</span><span class="small">Al L${this.buyL} • Sat L${this.sellL}</span></h3>
-      <div class="kv">
-        <div class="it"><label>Miktar (${this.qtyMode==='quote'?'USDT':'Adet'})</label><input id="q-${this.symbol}" value="${this.qty}"></div>
-        <div class="it"><label>Mod</label><select id="m-${this.symbol}">
-          <option value="quote"${this.qtyMode==='quote'?' selected':''}>USDT</option>
-          <option value="base"${this.qtyMode==='base'?' selected':''}>Adet</option></select></div>
-        <div class="it"><label>Alım Seviye</label><select id="bl-${this.symbol}"></select></div>
-        <div class="it"><label>Satış Seviye</label><select id="sl-${this.symbol}"></select></div>
-        <div class="it"><label>TTL (sn)</label><input id="t-${this.symbol}" type="number" min="3" value="${this.ttl}"></div>
-        <div class="it"><label>Slipaj %</label><input id="s-${this.symbol}" type="number" step="0.01" value="${this.slip}"></div>
-        <div class="it"><label>Chase</label><label class="row" style="gap:6px"><input id="c-${this.symbol}" type="checkbox"${this.chase?' checked':''}><span class="small">Açık</span></label></div>
+    const wrap = el('div','card'); wrap.id = `card-${this.symbol}`;
+    const h = el('h3'); 
+    const left = el('div'); left.innerHTML = `<span style="font-weight:700">${this.symbol}</span> <span class="smallmuted">Al L${this.buyL} • Sat L${this.sellL}</span>`;
+    const right = el('div','state');
+    this.dot = el('div','dot gray');
+    this.stateTxt = el('span','smallmuted','Idle');
+    right.append(this.dot,this.stateTxt);
+    h.append(left,right);
+
+    const kv = el('div','kv');
+    kv.innerHTML = `
+      <div class="item"><label>Miktar (${this.qtyMode==='quote'?'USDT':'Qty'})</label><input value="${this.qty}" id="i-${this.symbol}-qty"></div>
+      <div class="item"><label>Qty modu</label>
+        <select id="i-${this.symbol}-qmode"><option value="quote"${this.qtyMode==='quote'?' selected':''}>USDT</option><option value="base"${this.qtyMode==='base'?' selected':''}>Adet</option></select>
       </div>
-      <div class="depth">
-        <div class="depth-col"><h4>Alış (Bids)</h4><div class="dlist" id="bids-${this.symbol}"></div></div>
-        <div class="depth-col"><h4>Satış (Asks)</h4><div class="dlist" id="asks-${this.symbol}"></div></div>
-      </div>
-      <div class="row">
-        <button class="btn small good" id="st-${this.symbol}">Başlat</button>
-        <button class="btn small bad" id="sp-${this.symbol}">Durdur</button>
-        <button class="btn small gray" id="rm-${this.symbol}">Sil</button>
-        <span class="small">Pozisyon: <b id="pos-${this.symbol}">0</b> • Maliyet: <b id="avg-${this.symbol}">0</b></span>
+      <div class="item"><label>Alım Seviye</label><select id="i-${this.symbol}-buyL"></select></div>
+      <div class="item"><label>Satış Seviye</label><select id="i-${this.symbol}-sellL"></select></div>
+      <div class="item"><label>TTL (sn)</label><input value="${this.ttl}" id="i-${this.symbol}-ttl" type="number" min="3"></div>
+      <div class="item"><label>Slipaj %</label><input value="${this.slip}" id="i-${this.symbol}-slip" type="number" step="0.01"></div>
+      <div class="item"><label>Chase</label>
+        <label class="switch">
+          <input id="i-${this.symbol}-chase" type="checkbox"${this.chase?' checked':''}>
+          <div class="track"><div class="thumb"></div></div>
+        </label>
       </div>
     `;
+
+    const depth = el('div','depth');
+    depth.innerHTML = `
+      <div class="depth-col"><h4>Alış (Bids)</h4><div id="bids-${this.symbol}" class="depth-list"></div></div>
+      <div class="depth-col"><h4>Satış (Asks)</h4><div id="asks-${this.symbol}" class="depth-list"></div></div>
+    `;
+
+    const actions = el('div','row');
+    const bStart = el('button','btn good small','Başlat');
+    const bStop  = el('button','btn bad small','Durdur');
+    const bRemove= el('button','btn sec small','Sil');
+    actions.append(bStart,bStop,bRemove);
+
+    bStart.onclick = ()=>this.start();
+    bStop.onclick  = ()=>this.stop();
+    bRemove.onclick= ()=>{ this.stop(); wrap.remove(); this.removeFromStore(); if(Object.keys(App.bots).length===0) $('#cards').appendChild(el('div','empty','Liste boş.')); delete App.bots[this.symbol]; log(`${this.symbol} kaldırıldı`); };
+
+    wrap.append(h,kv,depth,el('hr','sep'),actions,el('div','smallmuted',`Pozisyon: <span id="pos-${this.symbol}">0</span> • Ortalama Maliyet: <span id="avg-${this.symbol}">0</span>`));
     $("#cards").appendChild(wrap);
 
-    const fill=(id)=>{ const s=$("#"+id); s.innerHTML=''; for(let i=1;i<=10;i++){ const o=document.createElement('option'); o.value=i; o.textContent=`L${i}`; s.appendChild(o);} };
-    fill(`bl-${this.symbol}`); fill(`sl-${this.symbol}`);
-    $(`#bl-${this.symbol}`).value=this.buyL; $(`#sl-${this.symbol}`).value=this.sellL;
+    // seviye seçenekleri
+    const fillLevels=(id)=>{ const s=$(`#${id}`); s.innerHTML=''; for(let i=1;i<=10;i++){ const o=el('option',null,`L${i}`); o.value=i; s.appendChild(o);} };
+    fillLevels(`i-${this.symbol}-buyL`); fillLevels(`i-${this.symbol}-sellL`);
+    $(`#i-${this.symbol}-buyL`).value=this.buyL; $(`#i-${this.symbol}-sellL`).value=this.sellL;
 
-    $(`#q-${this.symbol}`).onchange = e=> this.qty = Number(e.target.value||0);
-    $(`#m-${this.symbol}`).onchange = e=> this.qtyMode = e.target.value;
-    $(`#bl-${this.symbol}`).onchange= e=> this.buyL = Number(e.target.value);
-    $(`#sl-${this.symbol}`).onchange= e=> this.sellL = Number(e.target.value);
-    $(`#t-${this.symbol}`).onchange = e=> this.ttl = Number(e.target.value||20);
-    $(`#s-${this.symbol}`).onchange = e=> this.slip = Number(e.target.value||0.25);
-    $(`#c-${this.symbol}`).onchange = e=> this.chase = !!e.target.checked;
-
-    $(`#st-${this.symbol}`).onclick = ()=> this.start();
-    $(`#sp-${this.symbol}`).onclick = ()=> this.stop();
-    $(`#rm-${this.symbol}`).onclick = ()=> { this.stop(); document.getElementById(`card-${this.symbol}`).remove(); delete App.bots[this.symbol]; persistBots(); log(`${this.symbol} kaldırıldı`); if(!Object.keys(App.bots).length){ $("#cards").appendChild(Object.assign(document.createElement('div'),{id:"empty",className:"empty",innerHTML:"Liste boş."})); } };
+    // input handler’lar
+    $(`#i-${this.symbol}-qty`).onchange = e=>{ this.qty=Number(e.target.value||0); this.save(); };
+    $(`#i-${this.symbol}-qmode`).onchange = e=>{ this.qtyMode=e.target.value; $(`#i-${this.symbol}-qty`).previousElementSibling.textContent=`Miktar (${this.qtyMode==='quote'?'USDT':'Qty'})`; this.save(); };
+    $(`#i-${this.symbol}-buyL`).onchange = e=>{ this.buyL=Number(e.target.value); this.cardHeaderUpdate(); this.save(); };
+    $(`#i-${this.symbol}-sellL`).onchange = e=>{ this.sellL=Number(e.target.value); this.cardHeaderUpdate(); this.save(); };
+    $(`#i-${this.symbol}-ttl`).onchange = e=>{ this.ttl=Number(e.target.value); this.save(); };
+    $(`#i-${this.symbol}-slip`).onchange = e=>{ this.slip=Number(e.target.value); this.save(); };
+    $(`#i-${this.symbol}-chase`).onchange = e=>{ this.chase=!!e.target.checked; this.save(); };
   }
-  connectWS(){
+
+  cardHeaderUpdate(){
+    const h = document.querySelector(`#card-${this.symbol} h3 div:first-child`);
+    h.innerHTML = `<span style="font-weight:700">${this.symbol}</span> <span class="smallmuted">Al L${this.buyL} • Sat L${this.sellL}</span>`;
+  }
+
+  connect(){
+    const url = `${wsBase(App.testnet)}/${this.symbol.toLowerCase()}@depth5@100ms`;
     try{
       this.ws?.close();
-      this.ws=new WebSocket(wsUrl(this.symbol));
-      this.ws.onopen = ()=>{ $("#wsTag").textContent="WS: OK"; log(`${this.symbol} derinlik akışı bağlandı`); };
-      this.ws.onerror= e=> log(`${this.symbol} ws hata: ${e?.message||e}`);
-      this.ws.onclose= ()=> log(`${this.symbol} ws kapandı`);
-      this.ws.onmessage= ev=>{
-        const d=JSON.parse(ev.data);
-        const bids=(d.bids||d.data?.bids||[]).slice(0,10).map(x=>[Number(x[0]),Number(x[1])]);
-        const asks=(d.asks||d.data?.asks||[]).slice(0,10).map(x=>[Number(x[0]),Number(x[1])]);
-        this.depth={bids,asks}; this.renderDepth();
-      };
-    }catch(e){ log(`${this.symbol} ws bağlanamadı: ${e.message}`); }
+      this.ws = new WebSocket(url);
+      this.ws.onopen = ()=>{ this.wsAlive=true; $('#wsTag').textContent='WS: OK'; App.wsOk=true; log(`${this.symbol} depth stream bağlandı`); };
+      this.ws.onclose= ()=>{ this.wsAlive=false; log(`${this.symbol} ws kapandı`,'warn'); };
+      this.ws.onerror= ()=>{ this.wsAlive=false; $('#wsTag').textContent='WS: HATA'; App.wsOk=false; };
+      this.ws.onmessage = (ev)=> this.onDepth(JSON.parse(ev.data));
+    }catch(e){
+      log(`${this.symbol} ws bağlanamadı: ${e.message}`,'bad');
+    }
   }
+
+  onDepth(msg){
+    // Stream payload farklı formatlarda olabilir: {bids:[["p","q"],...], asks:[...]}
+    const bids = msg.bids || msg.data?.bids || [];
+    const asks = msg.asks || msg.data?.asks || [];
+    this.depth = {
+      bids: bids.slice(0,10).map(x=>[Number(x[0]), Number(x[1])]),
+      asks: asks.slice(0,10).map(x=>[Number(x[0]), Number(x[1])]),
+    };
+    this.renderDepth();
+    this.tick();
+  }
+
   renderDepth(){
-    const b=$("#bids-"+this.symbol), a=$("#asks-"+this.symbol); if(!b||!a) return;
-    b.innerHTML=''; a.innerHTML='';
-    for(const [p,q] of this.depth.bids){ const r=document.createElement('div'); r.className='drow bid'; r.innerHTML=`<span>${p}</span><span>${q}</span>`; b.appendChild(r); }
-    for(const [p,q] of this.depth.asks){ const r=document.createElement('div'); r.className='drow ask'; r.innerHTML=`<span>${p}</span><span>${q}</span>`; a.appendChild(r); }
+    const bEl = $(`#bids-${this.symbol}`), aEl = $(`#asks-${this.symbol}`);
+    bEl.innerHTML=''; aEl.innerHTML='';
+    for(const [p,q] of this.depth.bids){ const r=el('div','rowline bid'); r.innerHTML=`<span>${p}</span><span>${q}</span>`; bEl.appendChild(r); }
+    for(const [p,q] of this.depth.asks){ const r=el('div','rowline ask'); r.innerHTML=`<span>${p}</span><span>${q}</span>`; aEl.appendChild(r); }
   }
+
   start(){
-    if(this.timer) return; this.timer=setInterval(()=>this.loop(),400); log(`${this.symbol} bot başlatıldı`);
+    if(this.timer) return;
+    this.state='IDLE'; this.status('yellow','Hazır');
+    this.timer = setInterval(()=>this.tick(), 200);
+    log(`${this.symbol} bot başlatıldı`);
   }
+
   stop(){
     clearInterval(this.timer); this.timer=null;
-    if(this.openOrder){ cancelOrder({symbol:this.symbol, orderId:this.openOrder.id}).catch(()=>{}); this.openOrder=null; }
+    if(this.openOrder && App.mode()==='LIVE'){ cancelLive(this.symbol, this.openOrder.id).catch(()=>{}); }
+    this.openOrder=null;
+    this.status('gray','Durduruldu');
     log(`${this.symbol} bot durduruldu`);
   }
-  levelPrices(){
-    const b=this.depth.bids?.[this.buyL-1]?.[0]; const a=this.depth.asks?.[this.sellL-1]?.[0];
-    return {buyPriceRaw:b, sellPriceRaw:a, bestBid:this.depth.bids?.[0]?.[0], bestAsk:this.depth.asks?.[0]?.[0]};
+
+  status(color,txt){ this.dot.className='dot '+color; this.stateTxt.textContent=txt; }
+
+  levelPrice(){
+    const bid = this.depth.bids?.[this.buyL-1]?.[0];
+    const ask = this.depth.asks?.[this.sellL-1]?.[0];
+    return {bid, ask};
   }
-  async loop(){
-    if(!this.depth.bids.length||!this.depth.asks.length||!this.ex) return;
-    const {buyPriceRaw,sellPriceRaw,bestBid,bestAsk}=this.levelPrices(); if(!buyPriceRaw||!sellPriceRaw) return;
 
-    const buySlip=Math.abs((buyPriceRaw-bestBid)/bestBid)*100;
-    const sellSlip=Math.abs((sellPriceRaw-bestAsk)/bestAsk)*100;
-    if(buySlip>this.slip||sellSlip>this.slip) return;
+  async tick(){
+    if(!this.timer) return;
+    if(!this.depth.bids.length || !this.depth.asks.length) return;
 
-    const buyPrice=roundPrice(buyPriceRaw,this.ex.tickSize);
-    const sellPrice=roundPrice(sellPriceRaw,this.ex.tickSize);
+    // Paper/LIVE mod etiketi
+    $('#modeTag').textContent = `Mode: ${App.mode()}`;
 
-    let qtyBase=this.qtyMode==='quote'?(this.qty/buyPrice):this.qty;
-    qtyBase=floorQty(qtyBase,this.ex.stepSize);
-    if(qtyBase<=0) return;
-    if(qtyBase*buyPrice<this.ex.minNotional){ log(`${this.symbol}: MIN_NOTIONAL altında`); return; }
+    // Alım / Satış fiyatlarını belirle
+    const {bid: buyPriceRaw, ask: sellPriceRaw} = this.levelPrice();
+    if(!buyPriceRaw || !sellPriceRaw) return;
 
-    if(!this.openOrder && this.position<=0){
-      try{
-        const od=await placeOrder({symbol:this.symbol, side:"BUY", price:buyPrice, quantity:qtyBase});
-        this.openOrder={id:od.orderId, side:"BUY", price:buyPrice, qty:qtyBase, t0:now()};
-        log(`${this.symbol}: BUY @ ${buyPrice} qty ${qtyBase} (#${od.orderId})`);
-      }catch(e){ log(`${this.symbol}: BUY hata ${e.message}`); }
+    // Slipaj koruması: L1 ile hedef arasını ölç
+    const bestBid = this.depth.bids[0][0], bestAsk = this.depth.asks[0][0];
+    const buySlip = Math.abs((buyPriceRaw - bestBid)/bestBid)*100;
+    const sellSlip = Math.abs((sellPriceRaw - bestAsk)/bestAsk)*100;
+    if(buySlip>this.slip || sellSlip>this.slip){
+      this.status('yellow', 'Slipaj bekleniyor');
       return;
     }
 
-    if(this.openOrder){
-      const age=(now()-this.openOrder.t0)/1000;
-      try{
-        const st=await getOrder({symbol:this.symbol, orderId:this.openOrder.id});
-        const exec=Number(st.executedQty||0), orig=Number(st.origQty||this.openOrder.qty);
-        if(this.openOrder.side==='BUY'){
-          if(st.status==="FILLED"||exec>=orig){
-            const filled=exec||orig; this.position+=filled; this.avgCost=this.openOrder.price;
-            log(`${this.symbol}: BUY doldu → pozisyon ${this.position.toFixed(6)} @ ${this.avgCost}`);
-            this.openOrder=null;
-          }else if(age>this.ttl){
-            await cancelOrder({symbol:this.symbol, orderId:this.openOrder.id}).catch(()=>{});
-            this.openOrder=null;
-            if(this.chase){
-              try{
-                const od=await placeOrder({symbol:this.symbol, side:"BUY", price:buyPrice, quantity:qtyBase});
-                this.openOrder={id:od.orderId, side:"BUY", price:buyPrice, qty:qtyBase, t0:now()};
-                log(`${this.symbol}: BUY (chase) @ ${buyPrice} (#${od.orderId})`);
-              }catch(e){ log(`${this.symbol}: BUY chase hata ${e.message}`); }
-            }
-          }
-        }else if(this.openOrder.side==='SELL'){
-          if(st.status==="FILLED"||exec>=orig){
-            const sold=exec||orig;
-            const f=TradeBook.feeBps*0.0001; // bps → oran
-            const buyFee = this.avgCost * sold * f;
-            const sellFee= this.openOrder.price * sold * f;
-            const proceeds=this.openOrder.price*sold - sellFee;
-            const cost=this.avgCost*sold + buyFee;
-            const pnl=proceeds-cost; const pnlPct=pnl/cost;
-            TradeBook.add({ time:new Date().toISOString(), symbol:this.symbol, qty:sold, buyPrice:this.avgCost, sellPrice:this.openOrder.price, fee:buyFee+sellFee, pnl, pnlPct });
-            this.position-=sold; if(this.position<0) this.position=0; if(this.position===0) this.avgCost=0;
-            log(`${this.symbol}: SELL doldu → PnL ${pnl.toFixed(6)} (${(pnlPct*100).toFixed(3)}%)`);
-            this.openOrder=null;
-          }else if(age>this.ttl && this.chase){
-            await cancelOrder({symbol:this.symbol, orderId:this.openOrder.id}).catch(()=>{});
-            this.openOrder=null;
-            try{
-              const qty=floorQty(this.position,this.ex.stepSize);
-              if(qty>0){
-                const od=await placeOrder({symbol:this.symbol, side:"SELL", price:sellPrice, quantity:qty});
-                this.openOrder={id:od.orderId, side:"SELL", price:sellPrice, qty, t0:now()};
-                log(`${this.symbol}: SELL (chase) @ ${sellPrice} (#${od.orderId})`);
-              }
-            }catch(e){ log(`${this.symbol}: SELL chase hata ${e.message}`); }
-          }
-        }
-      }catch(e){ log(`${this.symbol}: order status hata ${e.message}`); }
+    // Yuvarlama & miktar belirleme
+    const ex = this.exInfo || {tickSize:0.0001, stepSize:0.001, minNotional:10};
+    const buyPrice = roundPrice(buyPriceRaw, ex.tickSize);
+    const sellPrice= roundPrice(sellPriceRaw, ex.tickSize);
+
+    let qtyBase;
+    if(this.qtyMode==='quote'){
+      // USDT tutarı → base qty
+      qtyBase = roundQty((this.qty / buyPrice), ex.stepSize);
+    }else{
+      qtyBase = roundQty(this.qty, ex.stepSize);
+    }
+    if(qtyBase<=0) { this.status('red','Miktar 0'); return; }
+    if(qtyBase*buyPrice < (ex.minNotional||0)) { this.status('red','Min notional altı'); return; }
+
+    // Duruma göre aksiyon
+    if(!this.openOrder && this.position<=0){
+      // Alış yoksa → L# fiyata LIMIT BUY
+      await this.placeBuy(buyPrice, qtyBase);
     }
 
-    if(!this.openOrder && this.position>0){
-      const qty=floorQty(this.position,this.ex.stepSize);
-      if(qty>0){
-        try{
-          const od=await placeOrder({symbol:this.symbol, side:"SELL", price:sellPrice, quantity:qty});
-          this.openOrder={id:od.orderId, side:"SELL", price:sellPrice, qty, t0:now()};
-          log(`${this.symbol}: SELL @ ${sellPrice} qty ${qty} (#${od.orderId})`);
-        }catch(e){ log(`${this.symbol}: SELL hata ${e.message}`); }
+    // Açık emir varsa kontrol
+    if(this.openOrder){
+      const elapsed = (now()-this.openOrder.time)/1000;
+      const ttlExceeded = elapsed > this.ttl;
+
+      // Paper fill kontrol
+      if(App.mode()==='PAPER'){
+        if(this.openOrder.side==='BUY'){
+          // En iyi ask <= limit fiyat → doldu varsay
+          if(bestAsk <= this.openOrder.price){
+            this.fillBuyPaper(this.openOrder.price, this.openOrder.qty);
+          }else if(ttlExceeded){
+            // chase veya bekle
+            if(this.chase){ this.cancelOrderLocal(); await this.placeBuy(buyPrice, qtyBase); }
+            else { this.status('yellow','TTL bekliyor'); }
+          }
+        }else if(this.openOrder.side==='SELL'){
+          if(bestBid >= this.openOrder.price){
+            this.fillSellPaper(this.openOrder.price, this.openOrder.qty);
+          }else if(ttlExceeded && this.chase){
+            this.cancelOrderLocal(); await this.placeSell(sellPrice, this.position);
+          }
+        }
+      }else{
+        // LIVE modda TTL/chase sadece backend iptal çağrısı ile
+        if(ttlExceeded && this.chase){
+          try{ await cancelLive(this.symbol, this.openOrder.id); log(`${this.symbol} TTL→cancel ${this.openOrder.id}`); this.openOrder=null; }
+          catch(e){ /* yut */ }
+        }
       }
     }
 
-    // UI
-    $(`#pos-${this.symbol}`).textContent=this.position.toFixed(6);
-    $(`#avg-${this.symbol}`).textContent=this.avgCost?this.avgCost.toFixed(6):'0';
+    // Pozisyon taşıyorsak ve satış emri yoksa → yerleştir
+    if(this.position>0 && !this.openOrder){
+      await this.placeSell(sellPrice, this.position);
+    }
+
+    // UI özet
+    $(`#pos-${this.symbol}`).textContent = this.position.toFixed(6);
+    $(`#avg-${this.symbol}`).textContent = this.avgCost? this.avgCost.toFixed(6):'0';
+  }
+
+  async placeBuy(price, qty){
+    this.openOrder = {side:'BUY', price, qty, time:now()};
+    this.status('yellow',`Alış @ ${price}`);
+    if(App.mode()==='LIVE'){
+      try{
+        const res = await sendOrderLive({symbol:this.symbol, side:'BUY', type:'LIMIT', price, quantity:qty, timeInForce:'GTC'});
+        this.openOrder.id = res.orderId;
+        log(`${this.symbol} LIVE BUY placed #${res.orderId} @ ${price} qty ${qty}`);
+      }catch(e){
+        log(`${this.symbol} LIVE BUY hata: ${e.message}`,'bad'); this.openOrder=null; this.status('red','BUY hata');
+      }
+    }else{
+      log(`${this.symbol} PAPER BUY planlandı @ ${price} qty ${qty}`);
+    }
+  }
+
+  async placeSell(price, qty){
+    qty = roundQty(qty, this.exInfo?.stepSize || 0.001);
+    if(qty<=0) return;
+    this.openOrder = {side:'SELL', price, qty, time:now()};
+    this.status('yellow',`Satış @ ${price}`);
+    if(App.mode()==='LIVE'){
+      try{
+        const res = await sendOrderLive({symbol:this.symbol, side:'SELL', type:'LIMIT', price, quantity:qty, timeInForce:'GTC'});
+        this.openOrder.id = res.orderId;
+        log(`${this.symbol} LIVE SELL placed #${res.orderId} @ ${price} qty ${qty}`);
+      }catch(e){
+        log(`${this.symbol} LIVE SELL hata: ${e.message}`,'bad'); this.openOrder=null; this.status('red','SELL hata');
+      }
+    }else{
+      log(`${this.symbol} PAPER SELL planlandı @ ${price} qty ${qty}`);
+    }
+  }
+
+  cancelOrderLocal(){ if(this.openOrder){ log(`${this.symbol} PAPER cancel ${this.openOrder.side} @ ${this.openOrder.price}`); this.openOrder=null; } }
+
+  fillBuyPaper(price, qty){
+    log(`${this.symbol} BUY filled @ ${price} qty ${qty}`);
+    // Weighted avg
+    const totalCost = this.avgCost*this.position + price*qty;
+    this.position += qty;
+    this.avgCost = totalCost/this.position;
+    this.openOrder=null;
+    this.status('green','Pozisyon Alındı');
+  }
+  fillSellPaper(price, qty){
+    log(`${this.symbol} SELL filled @ ${price} qty ${qty} → PnL ${(price-this.avgCost).toFixed(6)}`);
+    this.position -= qty;
+    if(this.position<=0){ this.position=0; this.avgCost=0; }
+    this.openOrder=null;
+    this.status('green','Satış Gerçekleşti');
   }
 }
 
-/*** ===== Uygulama Durumu / Kalıcılık ===== ***/
-const App = { bots:{} };
-function persistBots(){
-  const dump={};
-  for(const [k,b] of Object.entries(App.bots)){
-    dump[k]={ symbol:b.symbol,buyL:b.buyL,sellL:b.sellL,qtyMode:b.qtyMode,qty:b.qty,ttl:b.ttl,slip:b.slip,chase:b.chase };
-  }
-  saveLS("bots_v1", dump);
-}
-function restoreBots(){
-  const saved=loadLS("bots_v1", {});
-  for(const k of Object.keys(saved)){ addBot(saved[k]); }
-}
-
-/*** ===== Olaylar / Başlatma ===== ***/
-$("#btnConnect").onclick = async ()=>{
-  API_KEY=$("#apiKey").value.trim();
-  SECRET_RAW=$("#secKey").value.trim();
-  PROXY=$("#proxyUrl").value.trim();
-  if(!API_KEY||!SECRET_RAW||!PROXY){ alert("API Key, Secret Key ve Proxy URL gereklidir."); return; }
-  try{
-    const ping=await fetch(PROXY.replace(/\/$/,'')+'/ping').then(r=>r.json());
-    $("#proxyTag").textContent = ping.ok ? "Proxy: OK" : "Proxy: HATA";
-  }catch{ $("#proxyTag").textContent="Proxy: HATA"; }
-  const ok=await checkAuth();
-  if(ok && $("#remember").checked){ saveLS("cfg_v2",{api:API_KEY,sec:SECRET_RAW,proxy:PROXY,remember:true}); }
-};
-$("#btnClearKeys").onclick = ()=>{ localStorage.removeItem("cfg_v2"); $("#apiKey").value=""; $("#secKey").value=""; $("#proxyUrl").value=""; $("#remember").checked=false; $("#authTag").textContent="Auth: —"; };
-
-$("#startAll").onclick = ()=> Object.values(App.bots).forEach(b=>b.start());
-$("#stopAll").onclick  = ()=> Object.values(App.bots).forEach(b=>b.stop());
-$("#btnClearLog").onclick = ()=> (document.getElementById('logbox').innerHTML="");
-$("#btnExportCsv").onclick = ()=> TradeBook.exportCsv();
-$("#btnClearTrades").onclick = ()=>{ if(confirm("Tüm işlem geçmişini silmek istiyor musun?")) TradeBook.clear(); };
-$("#feeBps").onchange = e=>{ TradeBook.feeBps=Number(e.target.value||10); saveLS('fee_bps',TradeBook.feeBps); TradeBook.render(); };
-
+/*** ======= UI Başlat ======= ***/
 (function init(){
-  // L seçenekleri
-  for(let i=1;i<=10;i++){
-    const o1=document.createElement('option'); o1.value=i; o1.textContent=`Al L${i}`; $("#buyL").appendChild(o1);
-    const o2=document.createElement('option'); o2.value=i; o2.textContent=`Sat L${i}`; $("#sellL").appendChild(o2);
-  }
-  $("#buyL").value=2; $("#sellL").value=3;
+  // dropdownlar
+  const buyL = $('#buyL'), sellL = $('#sellL');
+  for(let i=1;i<=10;i++){ const o=document.createElement('option'); o.value=i; o.textContent=`Alım L${i}`; buyL.appendChild(o); }
+  for(let i=1;i<=10;i++){ const o=document.createElement('option'); o.value=i; o.textContent=`Satış L${i}`; sellL.appendChild(o); }
+  buyL.value=2; sellL.value=3;
 
-  // Kayıtlı ayarlar
-  const cfg=loadLS("cfg_v2");
-  if(cfg){ $("#apiKey").value=cfg.api||""; $("#secKey").value=cfg.sec||""; $("#proxyUrl").value=cfg.proxy||""; $("#remember").checked=!!cfg.remember; API_KEY=cfg.api||""; SECRET_RAW=cfg.sec||""; PROXY=cfg.proxy||""; }
+  // ayarları yükle
+  $('#backendUrl').value = App.backendUrl;
+  $('#toggleLive').checked = App.live;
+  $('#toggleTestnet').checked = App.testnet;
 
-  // TradeBook render
-  TradeBook.render();
+  // olaylar
+  $('#btnStartAll').onclick = ()=>App.startAll();
+  $('#btnStopAll').onclick  = ()=>App.stopAll();
+  $('#btnClearLog').onclick = ()=>$('#logbox').innerHTML='';
 
-  // Botları geri yükle
-  restoreBots();
+  $('#toggleLive').onchange = e=>{ App.live = !!e.target.checked; backendProbe(); };
+  $('#toggleTestnet').onchange = e=>{ App.testnet = !!e.target.checked; Object.values(App.bots).forEach(b=>b.connect()); backendProbe(); };
+  $('#backendUrl').onchange = e=>{ App.backendUrl = e.target.value; backendProbe(); };
+  $('#btnProbe').onclick = ()=>backendProbe();
+
+  $('#btnAdd').onclick = ()=>{
+    const s = ($('#sym').value||'').trim().toUpperCase();
+    if(!s) return alert('Sembol girin (örn. DYM)');
+    const quote = $('#quote').value;
+    const symbol = s.endsWith(quote) ? s : s+quote;
+    const cfg = {
+      symbol,
+      buyL:Number($('#buyL').value),
+      sellL:Number($('#sellL').value),
+      qtyMode:$('#qtyMode').value,
+      qty:Number($('#qty').value||0),
+      ttl:Number($('#ttl').value||30),
+      chase:$('#toggleChase').checked,
+      slip:Number($('#slip').value||0.2)
+    };
+    App.addBot(cfg);
+    $('#sym').value='';
+  };
+
+  // kayıtlı botları yükle
+  const saved = loadLS('bots', {});
+  for(const k of Object.keys(saved)){ App.addBot(saved[k]); }
+
+  backendProbe();
 })();
-
-// Coin ekle
-function addBot(cfg){
-  const s=(cfg.symbol||'').toUpperCase();
-  if(App.bots[s]) return alert(s+" zaten ekli");
-  const bot=new CoinBot(cfg);
-  App.bots[s]=bot;
-  persistBots();
-  $("#empty")?.remove();
-  log(`${s} eklendi`);
-}
-$("#add").onclick = ()=>{
-  const s=($("#sym").value||'').trim().toUpperCase(); if(!s) return alert("Sembol girin (örn. DYM)");
-  const quote=$("#quote").value; const symbol=s.endsWith(quote)?s:(s+quote);
-  const cfg={ symbol, buyL:Number($("#buyL").value), sellL:Number($("#sellL").value), qtyMode:$("#qmode").value, qty:Number($("#qty").value||0), ttl:Number($("#ttl").value||20), slip:Number($("#slip").value||0.25), chase:$("#chase").checked };
-  addBot(cfg); $("#sym").value='';
-};
 </script>
 </body>
 </html>
